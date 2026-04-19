@@ -22,7 +22,7 @@
         "foregroundImage": "./assets/images/icons/adaptive-icon.png",
         "backgroundColor": "#E0F3FF"
       },
-      "predictiveBackGestureEnabled": false,
+      "predictiveBackGestureEnabled": true,
       "permissions": [
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
