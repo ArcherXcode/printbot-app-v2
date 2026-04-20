@@ -11,35 +11,25 @@ import {
   ScrollView,
   ActivityIndicator,
   Image,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { z } from 'zod';
+import * as LocalAuthentication from 'expo-local-authentication';
+import * as SecureStore from 'expo-secure-store';
+
+import { loginSchema, isTwoFactorChallenge, unwrapLoginResponse } from '@/lib/assetHooksApis/publicPages/types';
+import type { LoginDto } from '@/lib/assetHooksApis/publicPages/types';
+import { useLoginMutation } from '@/lib/assetHooksApis/publicPages/hooks';
+import type { ApiError } from '@/lib/api/error-map';
+import { useAuthStore } from '@/lib/store/auth-store';
 
 /* ── Types ── */
-type FormFields = 'identifier' | 'password' | 'form';
+type FormFields = 'username' | 'password' | 'form';
 type FormErrors = Partial<Record<FormFields, string>>;
-
-/* ── Validation schema ── */
-const loginSchema = z.object({
-  identifier: z
-    .string()
-    .min(1, 'Username or email is required')
-    .refine(
-      (val) =>
-        val.includes('@')
-          ? z.string().email().safeParse(val).success
-          : val.length >= 3,
-      { message: 'Enter a valid email or username (min. 3 characters)' }
-    ),
-  password: z
-    .string()
-    .min(1, 'Password is required')
-    .min(8, 'Password must be at least 8 characters'),
-});
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -47,15 +37,19 @@ export default function LoginScreen() {
   const isDark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
 
-  const [identifier, setIdentifier] = useState('');
+  const biometricsEnabled = useAuthStore((s) => s.biometricsEnabled);
+  const setBiometricsEnabled = useAuthStore((s) => s.setBiometricsEnabled);
+
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [isLoading, setIsLoading] = useState(false);
+
+  const loginMutation = useLoginMutation();
 
   /* ── Validation ── */
-  const validate = () => {
-    const result = loginSchema.safeParse({ identifier, password });
+  const validate = (): LoginDto | null => {
+    const result = loginSchema.safeParse({ username, password });
     if (!result.success) {
       const fieldErrors: FormErrors = {};
       result.error.issues.forEach((issue) => {
@@ -63,25 +57,115 @@ export default function LoginScreen() {
         if (!fieldErrors[field]) fieldErrors[field] = issue.message;
       });
       setErrors(fieldErrors);
-      return false;
+      return null;
     }
     setErrors({});
-    return true;
+    return result.data;
+  };
+
+  const handlePostLogin = async (payload: LoginDto) => {
+    if (!biometricsEnabled) {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+      if (hasHardware && isEnrolled) {
+        Alert.alert(
+          'Enable Biometrics',
+          'Would you like to enable Face ID / Touch ID for quicker login next time?',
+          [
+            {
+              text: 'Not Now',
+              style: 'cancel',
+              onPress: () => router.replace('/(tabs)/(dashboard)/dashboard'),
+            },
+            {
+              text: 'Enable',
+              onPress: async () => {
+                const result = await LocalAuthentication.authenticateAsync({
+                  promptMessage: 'Enable Biometric Login',
+                });
+                if (result.success) {
+                  await SecureStore.setItemAsync('bio_username', payload.username);
+                  await SecureStore.setItemAsync('bio_password', payload.password);
+                  setBiometricsEnabled(true);
+                }
+                router.replace('/(tabs)/(dashboard)/dashboard');
+              },
+            },
+          ]
+        );
+        return;
+      }
+    }
+    
+    router.replace('/(tabs)/(dashboard)/dashboard');
+  };
+
+  const handleBiometricLogin = async () => {
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Log in with Biometrics',
+    });
+
+    if (result.success) {
+      const storedUsername = await SecureStore.getItemAsync('bio_username');
+      const storedPassword = await SecureStore.getItemAsync('bio_password');
+
+      if (storedUsername && storedPassword) {
+        const payload = { username: storedUsername, password: storedPassword };
+        loginMutation.mutate(payload, {
+          onSuccess: (data) => {
+            if (isTwoFactorChallenge(data)) {
+              Alert.alert(
+                'Two-Factor Authentication',
+                'Your account has 2FA enabled. Please verify via the web portal for now — mobile 2FA support is coming soon.',
+                [{ text: 'OK' }],
+              );
+              return;
+            }
+            handlePostLogin(payload);
+          },
+          onError: (error) => {
+            const apiError = error as unknown as ApiError;
+            setErrors({
+              form: apiError.message || 'Invalid credentials. Please try again.',
+            });
+          },
+        });
+      } else {
+        setErrors({ form: 'Biometric credentials not found. Please log in manually.' });
+      }
+    }
   };
 
   const handleLogin = async () => {
-    if (!validate()) return;
-    setIsLoading(true);
-    try {
-      // TODO: replace with your auth call
-      await new Promise((res) => setTimeout(res, 1500));
-      router.replace('/(tabs)/(dashboard)/dashboard');
-    } catch {
-      setErrors({ form: 'Invalid credentials. Please try again.' });
-    } finally {
-      setIsLoading(false);
-    }
+    const payload = validate();
+    if (!payload) return;
+
+    setErrors({});
+
+    loginMutation.mutate(payload, {
+      onSuccess: (data) => {
+        if (isTwoFactorChallenge(data)) {
+          Alert.alert(
+            'Two-Factor Authentication',
+            'Your account has 2FA enabled. Please verify via the web portal for now — mobile 2FA support is coming soon.',
+            [{ text: 'OK' }],
+          );
+          return;
+        }
+
+        handlePostLogin(payload);
+      },
+      onError: (error) => {
+        const apiError = error as unknown as ApiError;
+        setErrors({
+          form: apiError.message || 'Invalid credentials. Please try again.',
+        });
+      },
+    });
   };
+
+  const isLoading = loginMutation.isPending;
 
   /* ── Dynamic colors ── */
   const colors = {
@@ -169,7 +253,7 @@ export default function LoginScreen() {
                   styles.inputWrapper,
                   {
                     backgroundColor: colors.input,
-                    borderColor: errors.identifier
+                    borderColor: errors.username
                       ? colors.error
                       : colors.inputBorder,
                   },
@@ -178,18 +262,18 @@ export default function LoginScreen() {
                 <Feather
                   name="user"
                   size={18}
-                  color={errors.identifier ? colors.error : colors.icon}
+                  color={errors.username ? colors.error : colors.icon}
                   style={styles.inputIcon}
                 />
                 <TextInput
                   style={[styles.input, { color: colors.inputText }]}
                   placeholder="john@example.com"
                   placeholderTextColor={colors.placeholder}
-                  value={identifier}
+                  value={username}
                   onChangeText={(t) => {
-                    setIdentifier(t);
-                    if (errors.identifier)
-                      setErrors((e) => ({ ...e, identifier: undefined }));
+                    setUsername(t);
+                    if (errors.username)
+                      setErrors((e) => ({ ...e, username: undefined }));
                   }}
                   autoCapitalize="none"
                   returnKeyType="next"
@@ -197,9 +281,9 @@ export default function LoginScreen() {
                   autoComplete="email"
                 />
               </View>
-              {errors.identifier && (
+              {errors.username && (
                 <Text style={[styles.errorText, { color: colors.error }]}>
-                  {errors.identifier}
+                  {errors.username}
                 </Text>
               )}
             </View>
@@ -281,8 +365,8 @@ export default function LoginScreen() {
               accessibilityLabel="Log In"
               style={({ pressed }) => [
                 styles.ctaButton,
-                pressed && styles.ctaButtonPressed,
-                isLoading && styles.ctaButtonDisabled,
+                pressed && styles.buttonPressed,
+                isLoading && styles.buttonDisabled,
               ]}
             >
               <LinearGradient
@@ -298,6 +382,27 @@ export default function LoginScreen() {
                 )}
               </LinearGradient>
             </Pressable>
+
+            {/* ── Biometric Login button ── */}
+            {biometricsEnabled && (
+              <Pressable
+                onPress={handleBiometricLogin}
+                disabled={isLoading}
+                accessibilityRole="button"
+                accessibilityLabel="Log in with Biometrics"
+                style={({ pressed }) => [
+                  styles.bioButton,
+                  { borderColor: colors.cardBorder },
+                  pressed && styles.buttonPressed,
+                  isLoading && styles.buttonDisabled,
+                ]}
+              >
+                <Feather name="aperture" size={18} color={colors.heading} style={{ marginRight: 8 }} />
+                <Text style={[styles.bioButtonText, { color: colors.heading }]}>
+                  Log in with Biometrics
+                </Text>
+              </Pressable>
+            )}
           </View>
 
           {/* ── Sign up row ── */}
@@ -495,6 +600,29 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#ffffff',
     letterSpacing: 0.3,
+  },
+  
+  /* ── Bio Button ── */
+  bioButton: {
+    flexDirection: 'row',
+    width: '100%',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    height: 52,
+  },
+  bioButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  buttonPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
 
   /* ── Sign up row ── */

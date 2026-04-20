@@ -20,6 +20,10 @@ import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { z } from 'zod';
 
+import { useSignupUserMutation } from '@/lib/assetHooksApis/publicPages/hooks';
+import type { SignupUserPayload } from '@/lib/assetHooksApis/publicPages/types';
+import type { ApiError } from '@/lib/api/error-map';
+
 /* ──────────────────────────────────────────
    Types
 ────────────────────────────────────────── */
@@ -180,8 +184,10 @@ export default function SignupUserScreen() {
   const colors = buildColors(isDark);
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+
+  const signupMutation = useSignupUserMutation();
+  const isLoading = signupMutation.isPending;
 
   /* Password visibility */
   const [showPassword, setShowPassword] = useState(false);
@@ -240,17 +246,17 @@ export default function SignupUserScreen() {
     }
   };
 
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    try {
-      // TODO: replace with your API call
-      await new Promise((res) => setTimeout(res, 1500));
-      router.replace('/(tabs)/(dashboard)/dashboard');
-    } catch {
-      setErrors({ form: 'Something went wrong. Please try again.' });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSubmit = () => {
+    const { confirm_password, ...payload } = form;
+    signupMutation.mutate(payload as SignupUserPayload, {
+      onSuccess: () => {
+        router.replace('/(tabs)/(dashboard)/dashboard');
+      },
+      onError: (error) => {
+        const apiError = error as unknown as ApiError;
+        setErrors({ form: apiError.message || 'Something went wrong. Please try again.' });
+      },
+    });
   };
 
   const isLastStep = currentStep === STEPS.length - 1;

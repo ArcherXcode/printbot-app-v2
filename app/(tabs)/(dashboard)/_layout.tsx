@@ -1,5 +1,7 @@
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
+import { Feather } from '@expo/vector-icons';
+import { TouchableOpacity } from 'react-native';
 
 export default function DashboardLayout() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -11,6 +13,13 @@ export default function DashboardLayout() {
             fontWeight: 'bold' as const,
             color: colorScheme === 'dark' ? '#ffffff' : '#000000',
         },
+        headerRight: () => (
+            <TouchableOpacity
+                onPress={() => router.push('/(tabs)/(notifications)/notifications')}
+            >
+                <Feather name="bell" size={24} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
+            </TouchableOpacity>
+        )
     };
 
     return (

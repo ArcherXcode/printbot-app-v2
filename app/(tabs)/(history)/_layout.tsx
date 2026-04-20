@@ -1,7 +1,9 @@
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
+import { Feather } from '@expo/vector-icons';
+import { TouchableOpacity } from 'react-native';
 
-export default function QueueLayout() {
+export default function HistoryLayout() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
 
     const commonHeaderOptions = {
@@ -11,26 +13,23 @@ export default function QueueLayout() {
             fontWeight: 'bold' as const,
             color: colorScheme === 'dark' ? '#ffffff' : '#000000',
         },
+        headerRight: () => (
+            <TouchableOpacity
+                onPress={() => router.push('/(tabs)/(notifications)/notifications')}
+            >
+                <Feather name="bell" size={24} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
+            </TouchableOpacity>
+        )
     };
 
     return (
         <Stack
-            initialRouteName='(orders)'
+            initialRouteName='history'
         >
-            <Stack.Screen name="(orders)"
-                options={{
-                    ...commonHeaderOptions,
-                    headerTitleAlign: 'center',
-                    headerTitle: 'Orders'
-                }}
-            />
-            <Stack.Screen name="(payments)"
-                options={{
-                    ...commonHeaderOptions,
-                    headerTitleAlign: 'center',
-                    headerTitle: 'Payments'
-                }}
-            />
+            <Stack.Screen name="history" options={{
+                ...commonHeaderOptions,
+                headerTitle: 'Your History',
+            }} />
         </Stack>
     );
 }

@@ -3,7 +3,7 @@ import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
 import { Feather } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 
-export default function QueueLayout() {
+export default function PaymentsLayout() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
 
     const commonHeaderOptions = {
@@ -21,16 +21,15 @@ export default function QueueLayout() {
             </TouchableOpacity>
         )
     };
+
     return (
         <Stack
-            initialRouteName='queue'>
-            <Stack.Screen name="queue"
-                options={{
-                    ...commonHeaderOptions,
-                    headerTitleAlign: 'center',
-                    headerTitle: 'Order Queue'
-                }}
-            />
+            initialRouteName='payments'
+        >
+            <Stack.Screen name="payments" options={{
+                ...commonHeaderOptions,
+                headerTitle: 'Payments',
+            }} />
         </Stack>
     );
 }

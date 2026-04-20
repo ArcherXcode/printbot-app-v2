@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type UserRole = "USER" | "VENDOR" | "ADMIN";
 export type VendorStatus = "approved" | "pending" | "rejected";
@@ -32,9 +33,11 @@ type AuthStore = {
   user: SessionUser | null;
   isAuthenticated: boolean;
   isHydrated: boolean;
+  biometricsEnabled: boolean;
   setSession: (session: SessionInput) => void;
   clearSession: () => void;
   markHydrated: () => void;
+  setBiometricsEnabled: (enabled: boolean) => void;
 };
 
 export const authStore = create<AuthStore>()(
@@ -45,6 +48,7 @@ export const authStore = create<AuthStore>()(
       user: null,
       isAuthenticated: false,
       isHydrated: false,
+      biometricsEnabled: false,
       setSession: ({ accessToken, role, user }) =>
         set({
           accessToken,
@@ -60,15 +64,17 @@ export const authStore = create<AuthStore>()(
           isAuthenticated: false,
         }),
       markHydrated: () => set({ isHydrated: true }),
+      setBiometricsEnabled: (enabled) => set({ biometricsEnabled: enabled }),
     }),
     {
       name: "printbot-auth-session",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         accessToken: state.accessToken,
         role: state.role,
         user: state.user,
         isAuthenticated: state.isAuthenticated,
+        biometricsEnabled: state.biometricsEnabled,
       }),
       onRehydrateStorage: () => (state) => {
         state?.markHydrated();

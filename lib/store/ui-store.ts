@@ -32,13 +32,13 @@ export const useUiStore = create<UiStore>((set, get) => ({
   toggleMobileSidebar: () => set({ mobileSidebarOpen: !get().mobileSidebarOpen }),
   closeMobileSidebar: () => set({ mobileSidebarOpen: false }),
   pushToast: (toast) => {
-    const id = crypto.randomUUID();
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     set((state) => ({
       toasts: [...state.toasts, { id, ...toast }],
     }));
 
-    window.setTimeout(() => {
+    setTimeout(() => {
       get().dismissToast(id);
     }, 3500);
   },

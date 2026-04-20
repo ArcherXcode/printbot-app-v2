@@ -1,11 +1,13 @@
 import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
+import { queryClient } from '@/lib/query/query-client';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -14,7 +16,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: 'notFound',
+  initialRouteName: '(public)',
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -44,7 +46,11 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RootLayoutNav />
+    </QueryClientProvider>
+  );
 }
 
 function RootLayoutNav() {
@@ -52,7 +58,7 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack initialRouteName='notFound' screenOptions={{ headerShown: false }}>
+      <Stack initialRouteName='(public)' screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(legal)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(public)" options={{ headerShown: false }} />

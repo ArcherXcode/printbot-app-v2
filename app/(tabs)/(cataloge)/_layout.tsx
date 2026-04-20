@@ -1,5 +1,7 @@
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
+import { Feather } from '@expo/vector-icons';
+import { Pressable, TouchableOpacity } from 'react-native';
 
 export default function QueueLayout() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -11,7 +13,14 @@ export default function QueueLayout() {
             fontSize: 18,
             fontWeight: 'bold' as const,
             color: colorScheme === 'dark' ? '#ffffff' : '#000000',
-        }
+        },
+        headerRight: () => (
+            <TouchableOpacity
+                onPress={() => router.push('/(tabs)/(notifications)/notifications')}
+            >
+                <Feather name="bell" size={24} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
+            </TouchableOpacity>
+        )
     };
 
     return (
@@ -22,7 +31,7 @@ export default function QueueLayout() {
                 options={{
                     ...commonHeaderOptions,
                     headerTitleAlign: 'center',
-                    headerTitle: 'Cataloge'
+                    headerTitle: 'Shop Management'
                 }}
             />
         </Stack>

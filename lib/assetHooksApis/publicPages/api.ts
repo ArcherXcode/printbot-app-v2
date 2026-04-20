@@ -64,12 +64,6 @@ export async function logout(): Promise<unknown> {
     credentials: "include",
   });
 }
-// Debug utility: Check if the refresh cookie is present (for local testing only)
-export function debugCheckRefreshCookie(): boolean {
-  // HttpOnly cookies are not accessible via JS, but this can help check for misconfigurations
-  // If the backend sets a non-HttpOnly cookie for debugging, you can check here:
-  return document.cookie.includes("refresh_token");
-}
 
 export async function changePassword(payload: ChangePasswordDto): Promise<ChangePasswordResponse> {
   return apiFetch<ChangePasswordResponse>("/auth/change-password", {
