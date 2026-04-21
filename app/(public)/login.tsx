@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 
@@ -43,7 +43,17 @@ export default function LoginScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
   const [errors, setErrors] = useState<FormErrors>({});
+  const [bioTypes, setBioTypes] = useState<LocalAuthentication.AuthenticationType[]>([]);
+
+  useEffect(() => {
+    if (biometricsEnabled) {
+      LocalAuthentication.supportedAuthenticationTypesAsync().then(types => {
+        setBioTypes(types);
+      });
+    }
+  }, [biometricsEnabled]);
 
   const loginMutation = useLoginMutation();
 
@@ -185,6 +195,11 @@ export default function LoginScreen() {
     error: '#e05c6a',
     forgotLink: isDark ? '#5986e7' : '#4a6fd4',
   };
+
+  let bioIconName: keyof typeof MaterialCommunityIcons.glyphMap = "fingerprint";
+  if (bioTypes.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+    bioIconName = "face-recognition";
+  }
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
@@ -357,52 +372,51 @@ export default function LoginScreen() {
               )}
             </View>
 
-            {/* ── Login button ── */}
-            <Pressable
-              onPress={handleLogin}
-              disabled={isLoading}
-              accessibilityRole="button"
-              accessibilityLabel="Log In"
-              style={({ pressed }) => [
-                styles.ctaButton,
-                pressed && styles.buttonPressed,
-                isLoading && styles.buttonDisabled,
-              ]}
-            >
-              <LinearGradient
-                colors={['#5986e7', '#4a6fd4']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.ctaGradient}
-              >
-                {isLoading ? (
-                  <ActivityIndicator color="#ffffff" size="small" />
-                ) : (
-                  <Text style={styles.ctaText}>Log In</Text>
-                )}
-              </LinearGradient>
-            </Pressable>
-
-            {/* ── Biometric Login button ── */}
-            {biometricsEnabled && (
+            {/* ── Action Buttons ── */}
+            <View style={styles.actionRow}>
               <Pressable
-                onPress={handleBiometricLogin}
+                onPress={handleLogin}
                 disabled={isLoading}
                 accessibilityRole="button"
-                accessibilityLabel="Log in with Biometrics"
+                accessibilityLabel="Log In"
                 style={({ pressed }) => [
-                  styles.bioButton,
-                  { borderColor: colors.cardBorder },
+                  styles.ctaButton,
                   pressed && styles.buttonPressed,
                   isLoading && styles.buttonDisabled,
                 ]}
               >
-                <Feather name="aperture" size={18} color={colors.heading} style={{ marginRight: 8 }} />
-                <Text style={[styles.bioButtonText, { color: colors.heading }]}>
-                  Log in with Biometrics
-                </Text>
+                <LinearGradient
+                  colors={['#5986e7', '#4a6fd4']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.ctaGradient}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color="#ffffff" size="small" />
+                  ) : (
+                    <Text style={styles.ctaText}>Log In</Text>
+                  )}
+                </LinearGradient>
               </Pressable>
-            )}
+
+              {/* ── Biometric Login button ── */}
+              {biometricsEnabled && (
+                <Pressable
+                  onPress={handleBiometricLogin}
+                  disabled={isLoading}
+                  accessibilityRole="button"
+                  accessibilityLabel="Log in with Biometrics"
+                  style={({ pressed }) => [
+                    styles.bioIconButton,
+                    { borderColor: colors.cardBorder },
+                    pressed && styles.buttonPressed,
+                    isLoading && styles.buttonDisabled,
+                  ]}
+                >
+                  <MaterialCommunityIcons name={bioIconName} size={26} color={colors.heading} />
+                </Pressable>
+              )}
+            </View>
           </View>
 
           {/* ── Sign up row ── */}
@@ -574,12 +588,17 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
+  /* ── Action Row ── */
+  actionRow: {
+    flexDirection: 'row',
+    width: '100%',
+    marginTop: 6,
+  },
   /* ── CTA button ── */
   ctaButton: {
-    width: '100%',
+    flex: 1,
     borderRadius: 12,
     overflow: 'hidden',
-    marginTop: 6,
     height: 52,
   },
   ctaButtonPressed: {
@@ -594,6 +613,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 12,
+    height: '100%',
   },
   ctaText: {
     fontSize: 18,
@@ -602,20 +622,15 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  /* ── Bio Button ── */
-  bioButton: {
-    flexDirection: 'row',
-    width: '100%',
+  /* ── Bio Icon Button ── */
+  bioIconButton: {
+    width: 52,
+    height: 52,
     borderRadius: 12,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
-    height: 52,
-  },
-  bioButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+    marginLeft: 12,
   },
   buttonPressed: {
     opacity: 0.85,

@@ -17,7 +17,7 @@ export default function PaymentsLayout() {
             <TouchableOpacity
                 onPress={() => router.push('/(private)/(notifications)/notifications')}
             >
-                <Feather name="bell" size={24} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
+                <Feather name="bell" size={22} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
             </TouchableOpacity>
         )
     };

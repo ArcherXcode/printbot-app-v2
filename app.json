@@ -10,11 +10,11 @@
     "splash": {
       "image": "./assets/images/icons/splash-black.png",
       "resizeMode": "contain",
-      "backgroundColor": "#E0F3FF"
+      "backgroundColor": "#008cff"
     },
     "ios": {
-      "supportsTablet": true,
       "bundleIdentifier": "cloud.printbot.app",
+      "supportsTablet": true,
       "icon": "./assets/images/icons/printbot.icon",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Allow PrintBot to access your photos to upload and print documents. This permission is required to select files from your photo library to upload to our servers.",
@@ -29,11 +29,12 @@
       }
     },
     "android": {
+      "package": "cloud.printbot.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icons/adaptive-icon.png",
-        "backgroundColor": "#E0F3FF"
+        "backgroundColor": "#008cff"
       },
-      "predictiveBackGestureEnabled": true,
       "permissions": [
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
@@ -44,15 +45,25 @@
         "INTERNET",
         "ACCESS_NETWORK_STATE",
         "POST_NOTIFICATIONS"
-      ],
-      "package": "cloud.printbot.app",
-      "versionCode": 1
+      ]
     },
     "plugins": [
       "expo-router",
       "expo-font",
       "expo-web-browser",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "newArchEnabled": true,
+            "edgeToEdgeEnabled": true
+          },
+          "ios": {
+            "newArchEnabled": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

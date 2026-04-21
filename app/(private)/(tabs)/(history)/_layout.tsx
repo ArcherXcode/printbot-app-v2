@@ -15,9 +15,9 @@ export default function HistoryLayout() {
         },
         headerRight: () => (
             <TouchableOpacity
-                onPress={() => router.push('/(notifications)/notifications')}
+                onPress={() => router.push('/(private)/(notifications)/notifications')}
             >
-                <Feather name="bell" size={24} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
+                <Feather name="bell" size={22} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
             </TouchableOpacity>
         )
     };
@@ -28,6 +28,7 @@ export default function HistoryLayout() {
         >
             <Stack.Screen name="history" options={{
                 ...commonHeaderOptions,
+                headerTitleAlign: 'center',
                 headerTitle: 'Your History',
             }} />
         </Stack>

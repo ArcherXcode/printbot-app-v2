@@ -4,8 +4,10 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "prebuild": "bunx expo prebuild",
+    "doctor": "bunx expo-doctor",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit"
   },
@@ -17,6 +19,7 @@
     "babel-preset-expo": "~55.0.17",
     "expo": "~55.0.16",
     "expo-blur": "^55.0.14",
+    "expo-build-properties": "~55.0.13",
     "expo-constants": "~55.0.15",
     "expo-font": "~55.0.6",
     "expo-linear-gradient": "^55.0.13",
@@ -30,6 +33,7 @@
     "expo-secure-store": "~55.0.13",
     "expo-splash-screen": "~55.0.19",
     "expo-status-bar": "~55.0.5",
+    "expo-system-ui": "~55.0.16",
     "expo-web-browser": "~55.0.14",
     "lucide-react-native": "^1.8.0",
     "react": "19.2.0",

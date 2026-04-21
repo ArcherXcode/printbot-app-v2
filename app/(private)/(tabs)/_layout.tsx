@@ -53,15 +53,15 @@ export default function TabLayout() {
       <NativeTabs.Trigger name="(queue)" hidden={!isVendor}>
         <NativeTabs.Trigger.Icon
           sf={{ default: 'square.stack', selected: 'square.stack.fill' }}
-          md="stacks"
+          md="web_stories"
         />
         <NativeTabs.Trigger.Label>Queue</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="(cataloge)" hidden={!isVendor}>
         <NativeTabs.Trigger.Icon
-          sf={{ default: 'tray.full', selected: 'tray.full.fill' }}
-          md="hard_drive"
+          sf={{ default: 'plus.app', selected: 'plus.app.fill' }}
+          md="add_box"
         />
         <NativeTabs.Trigger.Label>Cataloge</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
