@@ -3,19 +3,19 @@ import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
 import { Feather } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 
-export default function PaymentsLayout() {
+export default function HistoryLayout() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
 
     const commonHeaderOptions = {
         headerShown: true,
         headerTitleStyle: {
-            fontSize: 18,
+            fontSize: 20,
             fontWeight: 'bold' as const,
             color: colorScheme === 'dark' ? '#ffffff' : '#000000',
         },
         headerRight: () => (
             <TouchableOpacity
-                onPress={() => router.push('/(tabs)/(notifications)/notifications')}
+                onPress={() => router.push('/(notifications)/notifications')}
             >
                 <Feather name="bell" size={24} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
             </TouchableOpacity>
@@ -24,11 +24,11 @@ export default function PaymentsLayout() {
 
     return (
         <Stack
-            initialRouteName='payments'
+            initialRouteName='history'
         >
-            <Stack.Screen name="payments" options={{
+            <Stack.Screen name="history" options={{
                 ...commonHeaderOptions,
-                headerTitle: 'Payments',
+                headerTitle: 'Your History',
             }} />
         </Stack>
     );

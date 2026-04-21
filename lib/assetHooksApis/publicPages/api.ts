@@ -58,6 +58,14 @@ export async function refresh(): Promise<AuthTokens> {
   });
 }
 
+export async function validateToken(accessToken: string): Promise<{ success: boolean; message: string }> {
+  return apiFetch<{ success: boolean; message: string }>("/auth/validate-token", {
+    method: "POST",
+    body: JSON.stringify({ accessToken }),
+    credentials: "include",
+  });
+}
+
 export async function logout(): Promise<unknown> {
   return apiFetch<unknown>("/auth/logout", {
     method: "POST",

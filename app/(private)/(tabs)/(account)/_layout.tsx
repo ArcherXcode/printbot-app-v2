@@ -27,7 +27,7 @@ export default function DashboardLayout() {
         headerShown: true,
         headerTintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
         headerTitleStyle: {
-            fontSize: 18,
+            fontSize: 20,
             fontWeight: 'bold' as const,
             color: colorScheme === 'dark' ? '#ffffff' : '#000000',
         },

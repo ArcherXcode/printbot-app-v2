@@ -9,13 +9,13 @@ export default function QueueLayout() {
     const commonHeaderOptions = {
         headerShown: true,
         headerTitleStyle: {
-            fontSize: 18,
+            fontSize: 20,
             fontWeight: 'bold' as const,
             color: colorScheme === 'dark' ? '#ffffff' : '#000000',
         },
         headerRight: () => (
             <TouchableOpacity
-                onPress={() => router.push('/(tabs)/(notifications)/notifications')}
+                onPress={() => router.push('/(notifications)/notifications')}
             >
                 <Feather name="bell" size={24} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
             </TouchableOpacity>

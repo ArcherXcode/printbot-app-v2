@@ -4,6 +4,7 @@ import { normalizeApiError } from "@/lib/api/error-map";
 import { queryClient } from "@/lib/query/query-client";
 import { queryKeys } from "@/lib/query/query-keys";
 import { useAuthStore, type UserRole } from "@/lib/store/auth-store";
+import * as SecureStore from 'expo-secure-store';
 import {
   changePassword,
   confirmPasswordReset,
@@ -188,9 +189,11 @@ export function useLogoutMutation() {
   const clearSession = useAuthStore((state) => state.clearSession);
   return useMutation({
     mutationFn: () => logout(),
-    onSettled: () => {
+    onSettled: async () => {
       clearSession();
       queryClient.clear();
+      await SecureStore.deleteItemAsync('bio_username');
+      await SecureStore.deleteItemAsync('bio_password');
     },
   });
 }
@@ -200,9 +203,11 @@ export function useLogoutAllMutation() {
 
   return useMutation({
     mutationFn: () => logoutAll(),
-    onSettled: () => {
+    onSettled: async () => {
       clearSession();
       queryClient.clear();
+      await SecureStore.deleteItemAsync('bio_username');
+      await SecureStore.deleteItemAsync('bio_password');
     },
   });
 }

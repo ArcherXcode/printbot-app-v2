@@ -20,12 +20,16 @@ type UiStore = {
   closeMobileSidebar: () => void;
   pushToast: (toast: Omit<ToastMessage, "id">) => void;
   dismissToast: (id: string) => void;
+  isFirstLaunch: boolean | null;
+  setIsFirstLaunch: (next: boolean | null) => void;
 };
 
 export const useUiStore = create<UiStore>((set, get) => ({
   sidebarOpen: false,
   mobileSidebarOpen: false,
   toasts: [],
+  isFirstLaunch: null,
+  setIsFirstLaunch: (next) => set({ isFirstLaunch: next }),
   setSidebarOpen: (next) => set({ sidebarOpen: next }),
   toggleSidebar: () => set({ sidebarOpen: !get().sidebarOpen }),
   setMobileSidebarOpen: (next) => set({ mobileSidebarOpen: next }),

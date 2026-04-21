@@ -62,6 +62,7 @@ export const authStore = create<AuthStore>()(
           role: null,
           user: null,
           isAuthenticated: false,
+          biometricsEnabled: false,
         }),
       markHydrated: () => set({ isHydrated: true }),
       setBiometricsEnabled: (enabled) => set({ biometricsEnabled: enabled }),

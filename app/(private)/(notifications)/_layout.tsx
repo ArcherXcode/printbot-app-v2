@@ -14,12 +14,9 @@ export default function NotificationsLayout() {
         headerBackVisible: true,
         headerTintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
         headerTitleStyle: {
-            fontSize: 18,
+            fontSize: 20,
             fontWeight: 'bold' as const,
             color: colorScheme === 'dark' ? '#ffffff' : '#000000',
-        },
-        headerStyle: {
-            backgroundColor: colorScheme === 'dark' ? '#1F2937' : '#FFFFFF'
         },
         headerLeft: () => (
             Platform.OS === 'ios' && (

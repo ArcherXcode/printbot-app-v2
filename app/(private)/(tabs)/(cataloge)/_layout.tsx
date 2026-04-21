@@ -1,21 +1,22 @@
 import { Stack, router } from 'expo-router';
 import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
 import { Feather } from '@expo/vector-icons';
-import { TouchableOpacity } from 'react-native';
+import { Pressable, TouchableOpacity } from 'react-native';
 
-export default function OrdersLayout() {
+export default function QueueLayout() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
 
     const commonHeaderOptions = {
         headerShown: true,
+        headerTintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
         headerTitleStyle: {
-            fontSize: 18,
+            fontSize: 20,
             fontWeight: 'bold' as const,
             color: colorScheme === 'dark' ? '#ffffff' : '#000000',
         },
         headerRight: () => (
             <TouchableOpacity
-                onPress={() => router.push('/(tabs)/(notifications)/notifications')}
+                onPress={() => router.push('/(private)/(notifications)/notifications')}
             >
                 <Feather name="bell" size={24} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
             </TouchableOpacity>
@@ -24,12 +25,15 @@ export default function OrdersLayout() {
 
     return (
         <Stack
-            initialRouteName='orders'
+            initialRouteName='cataloge'
         >
-            <Stack.Screen name="orders" options={{
-                ...commonHeaderOptions,
-                headerTitle: 'Orders',
-            }} />
+            <Stack.Screen name="cataloge"
+                options={{
+                    ...commonHeaderOptions,
+                    headerTitleAlign: 'center',
+                    headerTitle: 'Shop Management'
+                }}
+            />
         </Stack>
     );
 }

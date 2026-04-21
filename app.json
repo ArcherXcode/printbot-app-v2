@@ -15,7 +15,18 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "cloud.printbot.app",
-      "icon": "./assets/images/icons/printbot.icon"
+      "icon": "./assets/images/icons/printbot.icon",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow PrintBot to access your photos to upload and print documents. This permission is required to select files from your photo library to upload to our servers.",
+        "NSPhotoLibraryAddUsageDescription": "Allow PrintBot to save printed documents to your photo library. This permission is required to select printed documents after processing in our servers.",
+        "NSFaceIDUsageDescription": " Allow PrintBot to use Face ID for secure authentication. This permission is required to use Face ID to log in to the app.",
+        "NSLocationWhenInUseUsageDescription": "Allow PrintBot to access your location to find nearby printing locations. This permission is required to show you the nearest printing locations.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow PrintBot to access your location to find nearby printing locations. This permission is required to show you the nearest printing locations.",
+        "NSUserNotificationUsageDescription": "Allow PrintBot to send you notifications to keep you updated on your print orders.",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -28,7 +39,11 @@
         "WRITE_EXTERNAL_STORAGE",
         "ACCESS_MEDIA_LOCATION",
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "POST_NOTIFICATIONS"
       ],
       "package": "cloud.printbot.app",
       "versionCode": 1

@@ -76,7 +76,7 @@ export default function LoginScreen() {
             {
               text: 'Not Now',
               style: 'cancel',
-              onPress: () => router.replace('/(tabs)/(dashboard)/dashboard'),
+              onPress: () => router.replace('/(private)/(tabs)/(dashboard)/dashboard'),
             },
             {
               text: 'Enable',
@@ -89,7 +89,7 @@ export default function LoginScreen() {
                   await SecureStore.setItemAsync('bio_password', payload.password);
                   setBiometricsEnabled(true);
                 }
-                router.replace('/(tabs)/(dashboard)/dashboard');
+                router.replace('/(private)/(tabs)/(dashboard)/dashboard');
               },
             },
           ]
@@ -97,8 +97,8 @@ export default function LoginScreen() {
         return;
       }
     }
-    
-    router.replace('/(tabs)/(dashboard)/dashboard');
+
+    router.replace('/(private)/(tabs)/(dashboard)/dashboard');
   };
 
   const handleBiometricLogin = async () => {
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     letterSpacing: 0.3,
   },
-  
+
   /* ── Bio Button ── */
   bioButton: {
     flexDirection: 'row',
