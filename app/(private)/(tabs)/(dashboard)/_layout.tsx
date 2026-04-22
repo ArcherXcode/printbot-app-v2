@@ -1,7 +1,9 @@
 import { Stack, router } from 'expo-router';
 import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
 import { Feather } from '@expo/vector-icons';
-import { TouchableOpacity } from 'react-native';
+import { Platform, TouchableOpacity } from 'react-native';
+import { colors } from '@/constants/colors';
+import { StatusBar } from 'expo-status-bar';
 
 export default function DashboardLayout() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -13,6 +15,11 @@ export default function DashboardLayout() {
             fontWeight: 'bold' as const,
             color: colorScheme === 'dark' ? '#ffffff' : '#000000',
         },
+        headerTransparent: Platform.OS === 'ios' ? true : false,
+        headerShadowVisible: false,
+        headerStyle: {
+            backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors[colorScheme].headerBackground,
+        },
         headerRight: () => (
             <TouchableOpacity
                 onPress={() => router.push('/(private)/(notifications)/notifications')}
@@ -23,15 +30,18 @@ export default function DashboardLayout() {
     };
 
     return (
-        <Stack
-            initialRouteName='dashboard'
-            screenOptions={{
-                ...commonHeaderOptions,
-                headerTitleAlign: 'center',
-                headerTitle: 'Dashboard'
-            }}
-        >
-            <Stack.Screen name="dashboard" />
-        </Stack>
+        <>
+            <Stack
+                initialRouteName='dashboard'
+                screenOptions={{
+                    ...commonHeaderOptions,
+                    headerTitleAlign: 'center',
+                    headerTitle: 'Dashboard'
+                }}
+            >
+                <Stack.Screen name="dashboard" />
+            </Stack>
+            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+        </>
     );
 }

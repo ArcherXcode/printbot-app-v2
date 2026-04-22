@@ -3,6 +3,8 @@ import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { TouchableOpacity } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
+import { colors } from '@/constants/colors';
+import { Platform } from 'react-native';
 
 export default function LegalLayout() {
   const router = useRouter();
@@ -10,11 +12,15 @@ export default function LegalLayout() {
 
   const commonHeaderOptions = {
     headerShown: true,
-    headerTintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
     headerTitleStyle: {
-      fontSize: 18,
+      fontSize: 20,
       fontWeight: 'bold' as const,
       color: colorScheme === 'dark' ? '#ffffff' : '#000000',
+    },
+    headerTransparent: Platform.OS === 'ios' ? true : false,
+    headerShadowVisible: false,
+    headerStyle: {
+      backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors[colorScheme].headerBackground,
     },
     headerLeft: () => (
       <TouchableOpacity

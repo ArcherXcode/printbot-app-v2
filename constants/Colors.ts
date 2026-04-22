@@ -7,6 +7,8 @@ interface ThemeInterface {
     textSecondary: string;
     background: string;
     primary: string;
+    headerBackground: string;
+    headerText: string;
     tabIconDefault: string;
     tabIconSelected: string;
     tabPill: string;
@@ -19,6 +21,8 @@ interface ThemeInterface {
     textSecondary: string;
     background: string;
     primary: string;
+    headerBackground: string;
+    headerText: string;
     tabIconDefault: string;
     tabIconSelected: string;
     tabPill: string;
@@ -34,6 +38,8 @@ export const colors: ThemeInterface = {
     textSecondary: '#454746',
     background: '#fff',
     primary: '#008cff',
+    headerBackground: '#f0f4f8',
+    headerText: '#1f1f1f',
     tabIconSelected: '#012448',
     tabIconDefault: '#3f4140',
     tabPill: '#c2e7fe',
@@ -46,6 +52,8 @@ export const colors: ThemeInterface = {
     textSecondary: '#c5c7c5',
     background: '#131314',
     primary: '#0061b2',
+    headerBackground: '#1e1f20',
+    headerText: '#ffffff',
     tabIconSelected: '#bfe3fe',
     tabIconDefault: '#c3c7c5',
     tabPill: '#004a76',

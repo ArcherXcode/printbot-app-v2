@@ -22,6 +22,7 @@ export default function TabLayout() {
       indicatorColor={colors[colorScheme].tabPill}
       labelVisibilityMode="labeled"
       rippleColor={'transparent'}
+      backgroundColor={colors[colorScheme].tabBarBackground}
     >
       {/* ── SHARED TABS ── */}
       <NativeTabs.Trigger name="(dashboard)">

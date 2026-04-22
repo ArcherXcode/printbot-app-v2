@@ -1,11 +1,17 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useAuthStore } from '@/lib/store/auth-store';
+import VendorAccount from './vendorAccount';
+import UserAccount from './userAccount';
 
 export default function AccountScreen() {
+  const role = useAuthStore((state) => state.role);
+  const isVendor = role?.toUpperCase() === 'VENDOR';
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Account</Text>
-      <View style={styles.separator} />
-    </View>
+    isVendor ? (
+      <VendorAccount />
+    ) : (
+      <UserAccount />
+    )
   );
 }
 

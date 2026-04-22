@@ -74,7 +74,23 @@ export default function LoginScreen() {
   };
 
   const handlePostLogin = async (payload: LoginDto) => {
-    if (!biometricsEnabled) {
+    let currentBiometricsEnabled = biometricsEnabled;
+
+    if (biometricsEnabled) {
+      const storedUsername = await SecureStore.getItemAsync('bio_username');
+      if (storedUsername && storedUsername !== payload.username) {
+        // Logged into a different account; clear old credentials and prompt again
+        await SecureStore.deleteItemAsync('bio_username');
+        await SecureStore.deleteItemAsync('bio_password');
+        setBiometricsEnabled(false);
+        currentBiometricsEnabled = false;
+      } else if (storedUsername && storedUsername === payload.username) {
+        // Update password just in case it was changed
+        await SecureStore.setItemAsync('bio_password', payload.password);
+      }
+    }
+
+    if (!currentBiometricsEnabled) {
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 

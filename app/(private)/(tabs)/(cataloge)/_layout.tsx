@@ -1,7 +1,9 @@
 import { Stack, router } from 'expo-router';
 import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
 import { Feather } from '@expo/vector-icons';
-import { Pressable, TouchableOpacity } from 'react-native';
+import { Platform, TouchableOpacity } from 'react-native';
+import { colors } from '@/constants/colors';
+import { StatusBar } from 'expo-status-bar';
 
 export default function QueueLayout() {
     const colorScheme = useColorScheme() as 'light' | 'dark';
@@ -14,6 +16,11 @@ export default function QueueLayout() {
             fontWeight: 'bold' as const,
             color: colorScheme === 'dark' ? '#ffffff' : '#000000',
         },
+        headerTransparent: Platform.OS === 'ios' ? true : false,
+        headerShadowVisible: false,
+        headerStyle: {
+            backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors[colorScheme].headerBackground,
+        },
         headerRight: () => (
             <TouchableOpacity
                 onPress={() => router.push('/(private)/(notifications)/notifications')}
@@ -24,16 +31,19 @@ export default function QueueLayout() {
     };
 
     return (
-        <Stack
-            initialRouteName='cataloge'
-        >
-            <Stack.Screen name="cataloge"
-                options={{
-                    ...commonHeaderOptions,
-                    headerTitleAlign: 'center',
-                    headerTitle: 'Shop Management'
-                }}
-            />
-        </Stack>
+        <>
+            <Stack
+                initialRouteName='cataloge'
+            >
+                <Stack.Screen name="cataloge"
+                    options={{
+                        ...commonHeaderOptions,
+                        headerTitleAlign: 'center',
+                        headerTitle: 'Shop Management'
+                    }}
+                />
+            </Stack>
+            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+        </>
     );
 }

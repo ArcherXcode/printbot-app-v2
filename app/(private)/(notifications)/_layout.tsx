@@ -1,8 +1,10 @@
-import Header from '@/components/appLayout/header';
 import { Stack, useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
 import { Platform, TouchableOpacity } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
+import { StatusBar } from 'expo-status-bar';
+import { colors } from '@/constants/colors';
+
 
 export default function NotificationsLayout() {
     const router = useRouter();
@@ -12,11 +14,15 @@ export default function NotificationsLayout() {
         headerShown: true,
         headerBackTitleVisible: true,
         headerBackVisible: true,
-        headerTintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
         headerTitleStyle: {
             fontSize: 20,
             fontWeight: 'bold' as const,
             color: colorScheme === 'dark' ? '#ffffff' : '#000000',
+        },
+        headerTransparent: Platform.OS === 'ios' ? true : false,
+        headerShadowVisible: false,
+        headerStyle: {
+            backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors[colorScheme].headerBackground,
         },
         headerLeft: () => (
             Platform.OS === 'ios' && (
@@ -33,16 +39,19 @@ export default function NotificationsLayout() {
     };
 
     return (
-        <Stack
-            initialRouteName='notifications'
-        >
-            <Stack.Screen name="notifications"
-                options={{
-                    ...commonHeaderOptions,
-                    headerTitleAlign: 'center',
-                    headerTitle: 'Notifications'
-                }}
-            />
-        </Stack>
+        <>
+            <Stack
+                initialRouteName='notifications'
+            >
+                <Stack.Screen name="notifications"
+                    options={{
+                        ...commonHeaderOptions,
+                        headerTitleAlign: 'center',
+                        headerTitle: 'Notifications'
+                    }}
+                />
+            </Stack>
+            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+        </>
     );
 }

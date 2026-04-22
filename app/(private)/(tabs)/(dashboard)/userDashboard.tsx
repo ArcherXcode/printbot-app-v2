@@ -1,27 +1,36 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Platform } from 'react-native';
 
 export default function UserDashboardScreen() {
+
+  // ✅ Create plain data (not JSX)
+  const data = Array.from({ length: 100 }, (_, index) => ({
+    id: index.toString(),
+    title: `Item ${index + 1}`,
+  }));
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>User Dashboard</Text>
-      <View style={styles.separator} />
-    </View>
+    <FlatList
+      data={data}
+      keyExtractor={(item) => item.id}
+      contentContainerStyle={{ paddingHorizontal: 12 }}
+      renderItem={({ item }) => (
+        <View style={styles.card}>
+          <Text style={styles.title}>{item.title}</Text>
+        </View>
+      )}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  card: {
+    backgroundColor: '#f2f2f2',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

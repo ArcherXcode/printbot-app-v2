@@ -1,11 +1,18 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useAuthStore } from '@/lib/store/auth-store';
+import VendorDashboard from './vendorDashboard';
+import UserDashboard from './userDashboard';
 
 export default function DashboardScreen() {
+  const role = useAuthStore((state) => state.role);
+  const isVendor = role?.toUpperCase() === 'VENDOR';
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Dashboard</Text>
-      <View style={styles.separator} />
-    </View>
+    isVendor ? (
+      <VendorDashboard />
+    ) : (
+      <UserDashboard />
+    )
   );
 }
 

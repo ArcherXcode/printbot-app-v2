@@ -192,8 +192,6 @@ export function useLogoutMutation() {
     onSettled: async () => {
       clearSession();
       queryClient.clear();
-      await SecureStore.deleteItemAsync('bio_username');
-      await SecureStore.deleteItemAsync('bio_password');
     },
   });
 }
@@ -206,8 +204,6 @@ export function useLogoutAllMutation() {
     onSettled: async () => {
       clearSession();
       queryClient.clear();
-      await SecureStore.deleteItemAsync('bio_username');
-      await SecureStore.deleteItemAsync('bio_password');
     },
   });
 }

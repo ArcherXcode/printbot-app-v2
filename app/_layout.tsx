@@ -13,6 +13,7 @@ import { useUiStore } from '@/lib/store/ui-store';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { validateToken } from '@/lib/assetHooksApis/publicPages/api';
 import { PermissionsGate } from '@/components/PermissionsGate';
+import { StatusBar } from 'expo-status-bar';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -69,32 +70,28 @@ export default function RootLayout() {
 
     async function checkToken() {
       if (!isHydrated || isFirstLaunch === null) return;
-      
+
       if (isFirstLaunch === true) {
         if (mounted) setIsValidatingToken(false);
         return;
       }
-      
+
       const currentToken = useAuthStore.getState().accessToken;
-      
+
       if (!currentToken) {
         useAuthStore.getState().clearSession();
-        await SecureStore.deleteItemAsync('bio_username');
-        await SecureStore.deleteItemAsync('bio_password');
         if (mounted) setIsValidatingToken(false);
         return;
       }
-      
+
       try {
         await validateToken(currentToken);
       } catch (error) {
         useAuthStore.getState().clearSession();
-        await SecureStore.deleteItemAsync('bio_username');
-        await SecureStore.deleteItemAsync('bio_password');
       }
       if (mounted) setIsValidatingToken(false);
     }
-    
+
     checkToken();
 
     return () => { mounted = false; };
@@ -130,6 +127,7 @@ function RootLayoutNav() {
           <Stack.Screen name="notFound" options={{ title: 'Oops!' }} />
         </Stack>
       </PermissionsGate>
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
     </ThemeProvider>
   );
 }
