@@ -3,10 +3,13 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
 import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/lib/store/auth-store';
+import { TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme() as 'light' | 'dark';
   const role = useAuthStore((state) => state.role);
+  const router = useRouter();
 
   // Default to USER if no role is set or it's not explicitly VENDOR
   const isVendor = role?.toUpperCase() === 'VENDOR';
@@ -23,6 +26,7 @@ export default function TabLayout() {
       labelVisibilityMode="labeled"
       rippleColor={'transparent'}
       backgroundColor={colors[colorScheme].tabBarBackground}
+      minimizeBehavior="onScrollDown"
     >
       {/* ── SHARED TABS ── */}
       <NativeTabs.Trigger name="(dashboard)">
@@ -30,7 +34,7 @@ export default function TabLayout() {
           sf={{ default: isUser ? 'safari' : 'square.grid.2x2', selected: isUser ? 'safari.fill' : 'square.grid.2x2.fill' }}
           md={isUser ? 'explore' : 'browse'}
         />
-        <NativeTabs.Trigger.Label>{isUser ? 'Explore' : 'Dashboard'}</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{isUser ? 'Discover' : 'Dashboard'}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       {/* ── USER TABS ── */}

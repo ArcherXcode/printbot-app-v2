@@ -2,7 +2,7 @@ import { normalizeApiError, type ApiError } from "@/lib/api/error-map";
 import { deriveRoleFromToken } from "@/lib/assetHooksApis/publicPages/types";
 import { authStore } from "@/lib/store/auth-store";
 
-const DEFAULT_API_ORIGIN = process.env.API_URL || "http://192.168.1.124:3000";
+const DEFAULT_API_ORIGIN = process.env.API_URL || "http://192.168.1.144:3000";
 const API_PREFIX = process.env.API_PREFIX || "/v1/api";
 
 function resolveApiBaseUrl() {
