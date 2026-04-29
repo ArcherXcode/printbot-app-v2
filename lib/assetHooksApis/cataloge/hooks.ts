@@ -10,6 +10,7 @@ import {
   getMyVendorServiceOptions,
   getMyVendorServiceSettings,
   getVendorCatalogServices,
+  getVendorDashboard,
   getVendorPricing,
   getVendorStationeryItems,
   getVendors,
@@ -78,6 +79,14 @@ export function useVendorPricing() {
     queryKey: ["vendor", "pricing"],
     queryFn: getVendorPricing,
     staleTime: CACHE.stableStaleMs,
+  });
+}
+
+export function useVendorDashboard() {
+  return useQuery({
+    queryKey: ["dashboard", "vendor"],
+    queryFn: getVendorDashboard,
+    staleTime: CACHE.defaultStaleMs,
   });
 }
 

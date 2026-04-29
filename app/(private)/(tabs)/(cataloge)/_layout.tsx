@@ -10,11 +10,11 @@ export default function QueueLayout() {
 
     const commonHeaderOptions = {
         headerShown: true,
-        headerTintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
+        headerTintColor: colors[colorScheme].headerText,
         headerTitleStyle: {
             fontSize: 20,
             fontWeight: 'bold' as const,
-            color: colorScheme === 'dark' ? '#ffffff' : '#000000',
+            color: colors[colorScheme].headerText,
         },
         headerTransparent: Platform.OS === 'ios' ? true : false,
         headerShadowVisible: false,
@@ -25,7 +25,7 @@ export default function QueueLayout() {
             <TouchableOpacity
                 onPress={() => router.push('/(private)/(notifications)/notifications')}
             >
-                <Feather name="bell" size={22} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
+                <Feather name="bell" size={22} color={colors[colorScheme].headerText} />
             </TouchableOpacity>
         )
     };

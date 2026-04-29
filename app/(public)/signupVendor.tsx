@@ -299,7 +299,7 @@ export default function SignupVendorScreen() {
     };
     signupMutation.mutate(payload, {
       onSuccess: () => {
-        router.replace('/(tabs)/(dashboard)/dashboard');
+        router.replace('/(private)/(tabs)/(dashboard)/dashboard');
       },
       onError: (error) => {
         const apiError = error as unknown as ApiError;

@@ -14,6 +14,7 @@ import { useAuthStore } from '@/lib/store/auth-store';
 import { validateToken } from '@/lib/assetHooksApis/publicPages/api';
 import { PermissionsGate } from '@/components/PermissionsGate';
 import { StatusBar } from 'expo-status-bar';
+import { normalizeApiError } from '@/lib/api/error-map';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -79,7 +80,11 @@ export default function RootLayout() {
       const currentToken = useAuthStore.getState().accessToken;
 
       if (!currentToken) {
-        useAuthStore.getState().clearSession();
+        if (mounted) setIsValidatingToken(false);
+        return;
+      }
+
+      if (__DEV__) {
         if (mounted) setIsValidatingToken(false);
         return;
       }
@@ -87,7 +92,11 @@ export default function RootLayout() {
       try {
         await validateToken(currentToken);
       } catch (error) {
-        useAuthStore.getState().clearSession();
+        const mapped = normalizeApiError(error);
+
+        if (mapped.code === "HTTP_401" || mapped.code === "HTTP_403") {
+          useAuthStore.getState().clearSession();
+        }
       }
       if (mounted) setIsValidatingToken(false);
     }
@@ -116,11 +125,12 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <PermissionsGate>
-        <Stack initialRouteName='(public)' screenOptions={{ headerShown: false }}>
+        <Stack initialRouteName={isAuthenticated ? '(private)' : '(public)'} screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(legal)" options={{ headerShown: false }} />
           <Stack.Screen name="(private)" options={{ headerShown: false }} />
           <Stack.Screen name="(public)" options={{ headerShown: false }} />

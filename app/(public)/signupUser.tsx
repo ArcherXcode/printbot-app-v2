@@ -250,7 +250,7 @@ export default function SignupUserScreen() {
     const { confirm_password, ...payload } = form;
     signupMutation.mutate(payload as SignupUserPayload, {
       onSuccess: () => {
-        router.replace('/(tabs)/(dashboard)/dashboard');
+        router.replace('/(private)/(tabs)/(dashboard)/dashboard');
       },
       onError: (error) => {
         const apiError = error as unknown as ApiError;

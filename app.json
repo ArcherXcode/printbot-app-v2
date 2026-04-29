@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/images/icons/splash-black.png",
       "resizeMode": "contain",
-      "backgroundColor": "#008cff"
+      "backgroundColor": "#0a0e27"
     },
     "ios": {
       "bundleIdentifier": "cloud.printbot.app",

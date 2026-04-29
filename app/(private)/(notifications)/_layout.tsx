@@ -17,7 +17,7 @@ export default function NotificationsLayout() {
         headerTitleStyle: {
             fontSize: 20,
             fontWeight: 'bold' as const,
-            color: colorScheme === 'dark' ? '#ffffff' : '#000000',
+            color: colors[colorScheme].headerText,
         },
         headerTransparent: Platform.OS === 'ios' ? true : false,
         headerShadowVisible: false,
@@ -31,7 +31,7 @@ export default function NotificationsLayout() {
                 >
                     <ChevronLeft
                         size={24}
-                        color={colorScheme === 'dark' ? '#ffffff' : '#000000'}
+                        color={colors[colorScheme].headerText}
                     />
                 </TouchableOpacity>
             )

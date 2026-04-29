@@ -7,6 +7,7 @@ import {
   Modal,
   Platform,
   Pressable,
+  RefreshControl,
   StyleSheet,
   Switch,
   Text,
@@ -74,36 +75,10 @@ function stringFromKeys(item: Record<string, unknown>, keys: string[]): string |
   return undefined;
 }
 
-type ThemeTint = {
-  background: string;
-  surface: string;
-  elevated: string;
-  text: string;
-  muted: string;
-  border: string;
-  primary: string;
-  danger: string;
-  success: string;
-};
-
 export default function UserDashboardScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const colorScheme = (useColorScheme() as "light" | "dark") ?? "light";
-  const tint = useMemo<ThemeTint>(
-    () => ({
-      background: colors[colorScheme].background,
-      surface: colorScheme === "dark" ? "#161719" : "#ffffff",
-      elevated: colorScheme === "dark" ? "#1e1f20" : "#f7f9fc",
-      text: colors[colorScheme].textPrimary,
-      muted: colors[colorScheme].textSecondary,
-      border: colorScheme === "dark" ? "#2b2d31" : "#d6dde6",
-      primary: colors[colorScheme].primary,
-      danger: colors[colorScheme].tabBadgeBackground,
-      success: colorScheme === "dark" ? "#8fd6a4" : "#1c7f3a",
-    }),
-    [colorScheme],
-  );
   const screenSafeAreaStyle = useMemo(
     () => ({
       paddingTop: Platform.OS === "ios" ? insets.top + 55 : 0,
@@ -117,8 +92,8 @@ export default function UserDashboardScreen() {
   const [minRating, setMinRating] = useState("3.5");
   const [isOpenOnly, setIsOpenOnly] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [refreshCooling, setRefreshCooling] = useState(false);
   const [location, setLocation] = useState<LocationState>(FALLBACK_LOCATION);
-  const [isRefreshingLocation, setIsRefreshingLocation] = useState(false);
   const [loadedVendors, setLoadedVendors] = useState<VendorCardItem[]>([]);
   const lastAppliedPageRef = useRef(0);
 
@@ -129,8 +104,7 @@ export default function UserDashboardScreen() {
     [debouncedSearch, location.lat, location.lng, radiusKm, minRating, isOpenOnly, limit],
   );
 
-  const loadLocation = useCallback(async (isManual = false) => {
-    setIsRefreshingLocation(true);
+  const loadLocation = useCallback(async () => {
     try {
       const permission = await Location.requestForegroundPermissionsAsync();
 
@@ -156,15 +130,13 @@ export default function UserDashboardScreen() {
       setLocation((previous) => ({
         ...previous,
         source: "fallback",
-        error: isManual ? "Unable to refresh location." : "Unable to detect location. Showing shops near Bengaluru.",
+        error: "Unable to detect location. Showing shops near Bengaluru.",
       }));
-    } finally {
-      setIsRefreshingLocation(false);
     }
   }, []);
 
   useEffect(() => {
-    void loadLocation(false);
+    void loadLocation();
   }, [loadLocation]);
 
   const params = useMemo<VendorQueryParams>(
@@ -238,16 +210,26 @@ export default function UserDashboardScreen() {
   }, [hasNextPage, page, setPage, vendorsQuery.isFetching]);
 
   const refreshVendors = useCallback(() => {
+    if (vendorsQuery.isFetching || refreshCooling) {
+      return;
+    }
+
+    setRefreshCooling(true);
     setLoadedVendors([]);
     lastAppliedPageRef.current = 0;
 
     if (page === 1) {
-      void vendorsQuery.refetch();
+      void vendorsQuery.refetch().finally(() => {
+        setTimeout(() => setRefreshCooling(false), 1200);
+      });
       return;
     }
 
     setPage(1);
-  }, [page, setPage, vendorsQuery]);
+    setTimeout(() => setRefreshCooling(false), 1200);
+  }, [page, refreshCooling, setPage, vendorsQuery]);
+
+  const isListRefreshing = refreshCooling || (vendorsQuery.isFetching && page === 1);
 
   const clearFilters = () => {
     setSearch("");
@@ -258,13 +240,13 @@ export default function UserDashboardScreen() {
   };
 
   const renderVendor = ({ item }: { item: VendorCardItem }) => (
-    <View style={[styles.vendorCard, { backgroundColor: tint.elevated, borderColor: tint.border }]}>
+    <View style={[styles.vendorCard, { backgroundColor: colors[colorScheme].elevated, borderColor: colors[colorScheme].border }]}>
       <View style={styles.vendorTopRow}>
         <View style={styles.vendorTitleWrap}>
-          <Text style={[styles.vendorName, { color: tint.text }]} numberOfLines={2}>
+          <Text style={[styles.vendorName, { color: colors[colorScheme].textPrimary }]} numberOfLines={2}>
             {item.name}
           </Text>
-          <Text style={[styles.vendorAddress, { color: tint.muted }]} numberOfLines={2}>
+          <Text style={[styles.vendorAddress, { color: colors[colorScheme].textSecondary }]} numberOfLines={2}>
             {item.address}
           </Text>
         </View>
@@ -272,24 +254,24 @@ export default function UserDashboardScreen() {
           style={[
             styles.statusPill,
             {
-              borderColor: item.isOpen ? tint.success : tint.border,
-              backgroundColor: item.isOpen ? `${tint.success}16` : "transparent",
+              borderColor: item.isOpen ? colors[colorScheme].success : colors[colorScheme].border,
+              backgroundColor: item.isOpen ? `${colors[colorScheme].success}16` : "transparent",
             },
           ]}
         >
-          <Text style={[styles.statusText, { color: item.isOpen ? tint.success : tint.muted }]}>
+          <Text style={[styles.statusText, { color: item.isOpen ? colors[colorScheme].success : colors[colorScheme].textSecondary }]}>
             {item.isOpen ? "Open" : "Closed"}
           </Text>
         </View>
       </View>
 
       <View style={styles.vendorMetaRow}>
-        <View style={[styles.infoPill, { borderColor: tint.border }]}>
-          <Star size={14} color={tint.primary} />
-          <Text style={[styles.infoPillText, { color: tint.text }]}>{item.rating?.toFixed(1) ?? "N/A"}</Text>
+        <View style={[styles.infoPill, { borderColor: colors[colorScheme].border }]}>
+          <Star size={14} color={colors[colorScheme].primary} />
+          <Text style={[styles.infoPillText, { color: colors[colorScheme].textPrimary }]}>{item.rating?.toFixed(1) ?? "N/A"}</Text>
         </View>
-        <View style={[styles.infoPill, { borderColor: tint.border }]}>
-          <Text style={[styles.infoPillText, { color: tint.text }]}>
+        <View style={[styles.infoPill, { borderColor: colors[colorScheme].border }]}>
+          <Text style={[styles.infoPillText, { color: colors[colorScheme].textPrimary }]}>
             {item.distance ? `${item.distance.toFixed(1)} km` : "Distance N/A"}
           </Text>
         </View>
@@ -299,7 +281,7 @@ export default function UserDashboardScreen() {
         disabled={!item.id}
         style={({ pressed }) => [
           styles.primaryButton,
-          { backgroundColor: item.id ? tint.primary : tint.border, opacity: pressed ? 0.82 : 1 },
+          { backgroundColor: item.id ? colors[colorScheme].primary : colors[colorScheme].border, opacity: pressed ? 0.82 : 1 },
         ]}
         onPress={() => {
           if (!item.id) {
@@ -325,40 +307,31 @@ export default function UserDashboardScreen() {
   );
 
   return (
-    <View style={[styles.screen, { backgroundColor: Platform.OS === "android" ? tint.background : undefined }, screenSafeAreaStyle]}>
+    <View style={[styles.screen, { backgroundColor: Platform.OS === "android" ? colors[colorScheme].background : undefined }, screenSafeAreaStyle]}>
       <Stack.Screen
         options={{
           headerRight: () => (
             <View style={[styles.headerActions, { paddingHorizontal: 10, gap: Platform.OS === "ios" ? 16 : 20 }]}>
               <TouchableOpacity
                 accessibilityRole="button"
-                accessibilityLabel="Refresh location"
-                onPress={() => void loadLocation(true)}
-              >
-                {isRefreshingLocation ?
-                  <MaterialIcons name="location-searching" size={22} color={tint.text} />
-                  : <MaterialIcons name="my-location" size={22} color={tint.text} />}
-              </TouchableOpacity>
-              <TouchableOpacity
-                accessibilityRole="button"
                 accessibilityLabel="Open filters"
                 onPress={() => setFiltersOpen(true)}
               >
-                <MaterialIcons name="filter-list" size={24} color={tint.text} />
+                <MaterialIcons name="filter-list" size={24} color={colors[colorScheme].textPrimary} />
               </TouchableOpacity>
               <TouchableOpacity
                 accessibilityRole="button"
                 accessibilityLabel="View notifications"
                 onPress={() => router.push("/(private)/(notifications)/notifications")}
               >
-                <MaterialIcons name="notifications-none" size={24} color={tint.text} />
+                <MaterialIcons name="notifications-none" size={24} color={colors[colorScheme].textPrimary} />
               </TouchableOpacity>
             </View>
           ),
         }}
       />
       <View style={[styles.dashboardCard]}>
-        {location.error ? <Text style={[styles.locationError, { color: tint.danger }]}>{location.error}</Text> : null}
+        {location.error ? <Text style={[styles.locationError, { color: colors[colorScheme].danger }]}>{location.error}</Text> : null}
 
         <View style={styles.listShell}>
           <FlashList
@@ -366,19 +339,29 @@ export default function UserDashboardScreen() {
             keyExtractor={(item, index) => `${item.id ?? "missing"}-${index}`}
             renderItem={renderVendor}
             contentContainerStyle={styles.listContent}
+            bounces
+            alwaysBounceVertical
             showsVerticalScrollIndicator={false}
-            refreshing={vendorsQuery.isFetching && page === 1}
-            onRefresh={refreshVendors}
+            refreshControl={
+              <RefreshControl
+                refreshing={isListRefreshing}
+                onRefresh={refreshVendors}
+                tintColor={colors[colorScheme].primary}
+                colors={[colors[colorScheme].primary]}
+                progressBackgroundColor={colors[colorScheme].surface}
+                progressViewOffset={Platform.OS === "ios" ? insets.top + 55 : 0}
+              />
+            }
             ItemSeparatorComponent={() => <View style={styles.itemGap} />}
             onEndReached={loadNextPage}
             onEndReachedThreshold={0.55}
             ListEmptyComponent={
               vendorsQuery.isLoading ? (
-                <PageState title="Loading vendors" tint={tint} loading />
+                <PageState title="Loading vendors" colorScheme={colorScheme} loading />
               ) : vendorsQuery.isError ? (
-                <PageState title="Unable to load print shops" subtitle="Please retry print shop discovery." tint={tint} />
+                <PageState title="Unable to load print shops" subtitle="Please retry print shop discovery." colorScheme={colorScheme} />
               ) : (
-                <PageState title="No print shops found" subtitle="Try adjusting your search criteria." tint={tint} icon />
+                <PageState title="No print shops found" subtitle="Try adjusting your search criteria." colorScheme={colorScheme} icon />
               )
             }
             ListFooterComponent={
@@ -386,7 +369,7 @@ export default function UserDashboardScreen() {
                 <InfiniteListFooter
                   isLoading={vendorsQuery.isFetching && hasNextPage}
                   hasNextPage={hasNextPage}
-                  tint={tint}
+                  colorScheme={colorScheme}
                 />
               ) : null
             }
@@ -396,7 +379,7 @@ export default function UserDashboardScreen() {
 
       <FiltersModal
         open={filtersOpen}
-        tint={tint}
+        colorScheme={colorScheme}
         search={search}
         radiusKm={radiusKm}
         minRating={minRating}
@@ -429,20 +412,20 @@ function PageState({
   subtitle,
   loading,
   icon,
-  tint,
+  colorScheme,
 }: {
   title: string;
   subtitle?: string;
   loading?: boolean;
   icon?: boolean;
-  tint: ThemeTint;
+  colorScheme: "light" | "dark";
 }) {
   return (
-    <View style={[styles.stateCard, { backgroundColor: tint.elevated, borderColor: tint.border }]}>
-      {loading ? <ActivityIndicator color={tint.primary} /> : null}
-      {icon && !loading ? <PackageOpen size={34} color={tint.muted} strokeWidth={1.9} /> : null}
-      <Text style={[styles.stateTitle, { color: tint.text }]}>{title}</Text>
-      {subtitle ? <Text style={[styles.stateSubtitle, { color: tint.muted }]}>{subtitle}</Text> : null}
+    <View style={[styles.stateCard, { backgroundColor: colors[colorScheme].elevated, borderColor: colors[colorScheme].border }]}>
+      {loading ? <ActivityIndicator color={colors[colorScheme].primary} /> : null}
+      {icon && !loading ? <PackageOpen size={34} color={colors[colorScheme].textSecondary} strokeWidth={1.9} /> : null}
+      <Text style={[styles.stateTitle, { color: colors[colorScheme].textPrimary }]}>{title}</Text>
+      {subtitle ? <Text style={[styles.stateSubtitle, { color: colors[colorScheme].textSecondary }]}>{subtitle}</Text> : null}
     </View>
   );
 }
@@ -450,16 +433,16 @@ function PageState({
 function InfiniteListFooter({
   isLoading,
   hasNextPage,
-  tint,
+  colorScheme,
 }: {
   isLoading: boolean;
   hasNextPage: boolean;
-  tint: ThemeTint;
+  colorScheme: "light" | "dark";
 }) {
   return (
     <View style={styles.infiniteFooter}>
-      {isLoading ? <ActivityIndicator size="small" color={tint.text} /> : null}
-      <Text style={[styles.infiniteFooterText, { color: tint.muted }]}>
+      {isLoading ? <ActivityIndicator size="small" color={colors[colorScheme].textPrimary} /> : null}
+      <Text style={[styles.infiniteFooterText, { color: colors[colorScheme].textSecondary }]}>
         {isLoading ? "Loading more shops" : hasNextPage ? "Scroll for more" : "All shops loaded"}
       </Text>
     </View>
@@ -468,7 +451,7 @@ function InfiniteListFooter({
 
 function FiltersModal({
   open,
-  tint,
+  colorScheme,
   search,
   radiusKm,
   minRating,
@@ -481,7 +464,7 @@ function FiltersModal({
   onOpenOnlyChange,
 }: {
   open: boolean;
-  tint: ThemeTint;
+  colorScheme: "light" | "dark";
   search: string;
   radiusKm: string;
   minRating: string;
@@ -549,36 +532,36 @@ function FiltersModal({
           style={[
             styles.filterSheet,
             {
-              backgroundColor: tint.elevated,
-              borderColor: tint.border,
+              backgroundColor: colors[colorScheme].elevated,
+              borderColor: colors[colorScheme].border,
               paddingBottom: 28,
               transform: [{ translateY: sheetTranslateY }],
             },
           ]}
         >
           <View style={styles.filterHeader}>
-            <Text style={[styles.filterTitle, { color: tint.text }]}>Filter Shops</Text>
+            <Text style={[styles.filterTitle, { color: colors[colorScheme].textPrimary }]}>Filter Shops</Text>
             <View style={[styles.filterHeaderActions, { gap: Platform.OS === "ios" ? 14 : 18 }]}>
               <Pressable onPress={onClear}>
-                <MaterialIcons name="filter-list-off" size={24} color={tint.text} />
+                <MaterialIcons name="filter-list-off" size={24} color={colors[colorScheme].textPrimary} />
               </Pressable>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Close filters"
                 onPress={closeSheet}
               >
-                <MaterialIcons name="close" size={24} color={tint.text} />
+                <MaterialIcons name="close" size={24} color={colors[colorScheme].textPrimary} />
               </Pressable>
             </View>
           </View>
 
-          <FilterInput label="Search" value={search} placeholder="Search print shops" tint={tint} onChangeText={onSearchChange} />
+          <FilterInput label="Search" value={search} placeholder="Search print shops" colorScheme={colorScheme} onChangeText={onSearchChange} />
           <FilterInput
             label="Radius (km)"
             value={radiusKm}
             placeholder="10"
             keyboardType="number-pad"
-            tint={tint}
+            colorScheme={colorScheme}
             onChangeText={onRadiusChange}
           />
           <FilterInput
@@ -586,19 +569,19 @@ function FiltersModal({
             value={minRating}
             placeholder="3.5"
             keyboardType="decimal-pad"
-            tint={tint}
+            colorScheme={colorScheme}
             onChangeText={onRatingChange}
           />
 
-          <View style={[styles.switchRow, { borderColor: tint.border }]}>
+          <View style={[styles.switchRow, { borderColor: colors[colorScheme].border }]}>
             <View>
-              <Text style={[styles.switchTitle, { color: tint.text }]}>Open now only</Text>
-              <Text style={[styles.switchHint, { color: tint.muted }]}>Hide shops that are currently closed.</Text>
+              <Text style={[styles.switchTitle, { color: colors[colorScheme].textPrimary }]}>Open now only</Text>
+              <Text style={[styles.switchHint, { color: colors[colorScheme].textSecondary }]}>Hide shops that are currently closed.</Text>
             </View>
             <Switch value={isOpenOnly} onValueChange={onOpenOnlyChange} />
           </View>
 
-          <Pressable style={({ pressed }) => [styles.doneButton, { backgroundColor: tint.primary, opacity: pressed ? 0.82 : 1 }]} onPress={closeSheet}>
+          <Pressable style={({ pressed }) => [styles.doneButton, { backgroundColor: colors[colorScheme].primary, opacity: pressed ? 0.82 : 1 }]} onPress={closeSheet}>
             <Text style={styles.primaryButtonText}>Apply filters</Text>
           </Pressable>
         </Animated.View>
@@ -612,26 +595,26 @@ function FilterInput({
   value,
   placeholder,
   keyboardType,
-  tint,
+  colorScheme,
   onChangeText,
 }: {
   label: string;
   value: string;
   placeholder: string;
   keyboardType?: "default" | "number-pad" | "decimal-pad";
-  tint: ThemeTint;
+  colorScheme: "light" | "dark";
   onChangeText: (value: string) => void;
 }) {
   return (
     <View style={styles.filterField}>
-      <Text style={[styles.filterLabel, { color: tint.muted }]}>{label}</Text>
+      <Text style={[styles.filterLabel, { color: colors[colorScheme].textSecondary }]}>{label}</Text>
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={tint.muted}
+        placeholderTextColor={colors[colorScheme].textSecondary}
         keyboardType={keyboardType}
-        style={[styles.filterInput, { color: tint.text, borderColor: tint.border, backgroundColor: tint.surface }]}
+        style={[styles.filterInput, { color: colors[colorScheme].textPrimary, borderColor: colors[colorScheme].border, backgroundColor: colors[colorScheme].surface }]}
       />
     </View>
   );

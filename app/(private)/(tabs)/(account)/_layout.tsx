@@ -45,7 +45,7 @@ export default function DashboardLayout() {
         headerTitleStyle: {
             fontSize: 20,
             fontWeight: 'bold' as const,
-            color: colorScheme === 'dark' ? '#ffffff' : '#000000',
+            color: colors[colorScheme].headerText,
         },
         headerTransparent: Platform.OS === 'ios' ? true : false,
         headerShadowVisible: false,

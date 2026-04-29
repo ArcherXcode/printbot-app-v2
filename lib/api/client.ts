@@ -45,6 +45,12 @@ type ApiFetchOptions = {
   responseType?: "json" | "blob";
 };
 
+function clearSessionAfterAuthFailure() {
+  if (!__DEV__) {
+    authStore.getState().clearSession();
+  }
+}
+
 function hasJsonContentType(response: Response): boolean {
   const contentType = response.headers.get("content-type");
   return typeof contentType === "string" && contentType.toLowerCase().includes("application/json");
@@ -77,14 +83,14 @@ async function refreshSession(): Promise<void> {
     const payload = hasJsonBody ? (JSON.parse(rawText) as ApiEnvelope<Record<string, unknown>>) : null;
 
     if (!response.ok || (payload !== null && payload.success === false)) {
-      authStore.getState().clearSession();
+      clearSessionAfterAuthFailure();
       throw payload !== null && payload.success === false
         ? payload.error
         : { code: "HTTP_401", message: "Unable to refresh session." };
     }
     
     if (!payload || !payload.data) {
-      authStore.getState().clearSession();
+      clearSessionAfterAuthFailure();
       throw { code: "HTTP_401", message: "Unable to refresh session." } satisfies ApiError;
     }
 
@@ -92,7 +98,7 @@ async function refreshSession(): Promise<void> {
     const accessToken = readToken(tokenData, ["access_token", "access-token", "accessToken"]);
 
     if (!accessToken) {
-      authStore.getState().clearSession();
+      clearSessionAfterAuthFailure();
       throw {
         code: "HTTP_401",
         message: "Unable to refresh session.",
