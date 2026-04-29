@@ -38,7 +38,7 @@ export default function QueueLayout() {
                 <Stack.Screen name="cataloge"
                     options={{
                         ...commonHeaderOptions,
-                        headerTitleAlign: 'center',
+                        headerTitleAlign: 'left',
                         headerTitle: 'Shop Management'
                     }}
                 />

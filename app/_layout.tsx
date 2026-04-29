@@ -134,7 +134,7 @@ function RootLayoutNav() {
           <Stack.Screen name="(legal)" options={{ headerShown: false }} />
           <Stack.Screen name="(private)" options={{ headerShown: false }} />
           <Stack.Screen name="(public)" options={{ headerShown: false }} />
-          <Stack.Screen name="notFound" options={{ title: 'Oops!' }} />
+          <Stack.Screen name="notFound" options={{ title: 'Oops!', headerTitleAlign: 'left' }} />
         </Stack>
       </PermissionsGate>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />

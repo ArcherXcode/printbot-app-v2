@@ -36,7 +36,7 @@ export default function HistoryLayout() {
             >
                 <Stack.Screen name="history" options={{
                     ...commonHeaderOptions,
-                    headerTitleAlign: 'center',
+                    headerTitleAlign: 'left',
                     headerTitle: 'Your History',
                 }} />
             </Stack>

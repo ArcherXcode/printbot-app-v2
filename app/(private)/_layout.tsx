@@ -7,6 +7,7 @@ export default function NotificationsLayout() {
         >
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="(notifications)" options={{ headerShown: false }} />
+            <Stack.Screen name="(support)" options={{ headerShown: false }} />
         </Stack>
     );
 }

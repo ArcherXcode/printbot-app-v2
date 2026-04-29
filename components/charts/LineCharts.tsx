@@ -13,7 +13,7 @@ export default function LineChart({ points, width, height, color }: { points: Ch
   const colorScheme = (useColorScheme() as "light" | "dark") ?? "light";
 
   const path = useMemo(() => {
-    const builder = Skia.PathBuilder.Make();
+    const p = Skia.Path.Make();
     const safePoints = points.length > 0 ? points : [{ label: "", value: 0 }];
     const values = safePoints.map((point) => point.value);
     const max = Math.max(...values, 1);
@@ -28,13 +28,13 @@ export default function LineChart({ points, width, height, color }: { points: Ch
       const y = bottom - (Math.max(point.value, 0) / max) * (bottom - top);
 
       if (index === 0) {
-        builder.moveTo(x, y);
+        p.moveTo(x, y);
       } else {
-        builder.lineTo(x, y);
+        p.lineTo(x, y);
       }
     });
 
-    return builder.build();
+    return p;
   }, [height, points, width]);
 
   return (

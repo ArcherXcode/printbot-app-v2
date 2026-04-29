@@ -28,6 +28,7 @@ import { useVendors } from "@/lib/assetHooksApis/cataloge/hooks";
 import type { VendorQueryParams } from "@/lib/assetHooksApis/cataloge/api";
 import { useDebouncedValue } from "@/hooks/queryHooks/useDebouncedValue";
 import { usePaginationParams } from "@/hooks/queryHooks/usePaginationParams";
+import { useAuthStore } from "@/lib/store/auth-store";
 
 type LocationState = {
   lat: number;
@@ -75,6 +76,89 @@ function stringFromKeys(item: Record<string, unknown>, keys: string[]): string |
   return undefined;
 }
 
+function useLocation() {
+  const [loading, setLoading] = useState(false);
+  const [coords, setCoords] = useState<Location.LocationObjectCoords | null>(null);
+
+  const fetchLocation = async () => {
+    setLoading(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.warn('Location permission denied');
+        return;
+      }
+      const result = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      setCoords(result.coords);
+      console.log('Location:', result.coords); // Replace with your handler
+    } catch (e) {
+      console.error('Location error:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { fetchLocation, loading, coords };
+}
+
+// ── iOS Location Button (pill style) ────────────────────────
+function IOSLocationButton({
+  onPress,
+  loading,
+  colorScheme,
+}: {
+  onPress: () => void;
+  loading: boolean;
+  colorScheme: 'light' | 'dark';
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.iosButton,
+        pressed && styles.iosButtonPressed,
+        { backgroundColor: colors[colorScheme].primary },
+      ]}
+    >
+      {loading ? (
+        <ActivityIndicator size="small" color="#fff" />
+      ) : (
+        <>
+          {/* SF Symbol rendered via Text — swap with your icon lib */}
+          <FontAwesome name="location-arrow" size={22} color="#fff" />
+        </>
+      )}
+    </Pressable>
+  );
+}
+
+// ── Android FAB ──────────────────────────────────────────────
+function AndroidFAB({
+  onPress,
+  loading,
+  colorScheme,
+}: {
+  onPress: () => void;
+  loading: boolean;
+  colorScheme: 'light' | 'dark';
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.fab, pressed && styles.fabPressed, { backgroundColor: colors[colorScheme].tabPill },]}
+      android_ripple={{ color: 'rgba(255,255,255,0.3)', borderless: true, radius: 28 }}
+    >
+      {loading ? (
+        <ActivityIndicator size="small" color="#fff" />
+      ) : (
+        <FontAwesome name="location-arrow" size={24} color={colors[colorScheme].tabIconSelected} />
+      )}
+    </Pressable>
+  );
+}
+
 export default function UserDashboardScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -87,6 +171,12 @@ export default function UserDashboardScreen() {
     [insets.bottom, insets.left, insets.right, insets.top],
   );
 
+  const role = useAuthStore((state) => state.role);
+
+  const isVendor = role?.toUpperCase() === 'VENDOR';
+  const isUser = !isVendor;
+
+  const { fetchLocation, loading } = useLocation();
   const [search, setSearch] = useState("");
   const [radiusKm, setRadiusKm] = useState("10");
   const [minRating, setMinRating] = useState("3.5");
@@ -403,6 +493,13 @@ export default function UserDashboardScreen() {
           setPage(1);
         }}
       />
+
+      {/* ── Platform location button overlay ── */}
+      {Platform.OS === 'ios' && isUser ? (
+        <IOSLocationButton onPress={fetchLocation} loading={loading} colorScheme={colorScheme} />
+      ) : Platform.OS === 'android' && isUser ? (
+        <AndroidFAB onPress={fetchLocation} loading={loading} colorScheme={colorScheme} />
+      ) : null}
     </View>
   );
 }
@@ -804,5 +901,41 @@ const styles = StyleSheet.create({
     borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
-  }
+  },
+  iosButton: {
+    position: 'absolute',
+    bottom: 95,
+    right: 25,             // sits just above the native tab bar
+    alignSelf: 'center',
+    height: 50,
+    width: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 25
+  },
+  iosButtonPressed: {
+    opacity: 0.75,
+    transform: [{ scale: 0.96 }],
+  },
+  iosButtonIcon: {
+    fontSize: 16,
+  },
+
+  // Android: classic FAB — bottom-right
+  fab: {
+    position: 'absolute',
+    bottom: 18,           // clears the Material tab bar
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  fabPressed: {
+    transform: [{ scale: 0.95 }],
+  },
+  fabIcon: {
+    fontSize: 24,
+  },
 });

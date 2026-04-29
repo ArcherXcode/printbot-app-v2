@@ -22,7 +22,7 @@ export default function DashboardLayout() {
             'Logout',
             'Are you sure you want to logout?',
             [
-                { text: 'Cancel', style: 'cancel', onPress: () => {} },
+                { text: 'Cancel', style: 'cancel', onPress: () => { } },
                 {
                     text: 'Logout',
                     style: 'destructive',
@@ -64,20 +64,13 @@ export default function DashboardLayout() {
     return (
         <>
             <Stack
-                initialRouteName='account'
+                initialRouteName='settings'
             >
-                <Stack.Screen name="account"
+                <Stack.Screen name="settings"
                     options={{
                         ...commonHeaderOptions,
-                        headerTitleAlign: 'center',
+                        headerTitleAlign: 'left',
                         headerTitle: 'Your Account'
-                    }}
-                />
-                <Stack.Screen name="support"
-                    options={{
-                        ...commonHeaderOptions,
-                        headerTitleAlign: 'center',
-                        headerTitle: 'Support Center'
                     }}
                 />
             </Stack>

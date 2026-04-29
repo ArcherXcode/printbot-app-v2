@@ -33,7 +33,7 @@ export default function DashboardLayout() {
                 initialRouteName='dashboard'
                 screenOptions={{
                     ...commonHeaderOptions,
-                    headerTitleAlign: 'center',
+                    headerTitleAlign: 'left',
                     headerTitle: isUser ? 'Discover Shops' : 'Dashboard',
                 }}
             >

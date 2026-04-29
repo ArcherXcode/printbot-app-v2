@@ -186,16 +186,17 @@ export default function VendorDashboardScreen() {
         ItemSeparatorComponent={() => <View style={styles.sectionGap} />}
         ListEmptyComponent={
           dashboardQuery.isLoading ? (
-            <PageState title="Loading vendor dashboard" loading />
+            <PageState title="Loading vendor dashboard" loading colorScheme={colorScheme} />
           ) : dashboardQuery.isError ? (
             <PageState
               title="Unable to load vendor dashboard"
               subtitle="Retry to refresh your operational dashboard."
               actionLabel="Retry"
               onAction={() => void dashboardQuery.refetch()}
+              colorScheme={colorScheme}
             />
           ) : (
-            <PageState title="No vendor data" subtitle="Vendor dashboard data is currently unavailable." empty />
+            <PageState title="No vendor data" subtitle="Vendor dashboard data is currently unavailable." empty colorScheme={colorScheme} />
           )
         }
       />

@@ -46,7 +46,7 @@ export default function NotificationsLayout() {
                 <Stack.Screen name="notifications"
                     options={{
                         ...commonHeaderOptions,
-                        headerTitleAlign: 'center',
+                        headerTitleAlign: 'left',
                         headerTitle: 'Notifications'
                     }}
                 />

@@ -37,7 +37,7 @@ export default function PaymentsLayout() {
             >
                 <Stack.Screen name="payments" options={{
                     ...commonHeaderOptions,
-                    headerTitleAlign: 'center',
+                    headerTitleAlign: 'left',
                     headerTitle: 'Your Payments',
                 }} />
             </Stack>

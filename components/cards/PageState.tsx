@@ -10,6 +10,7 @@ export default function PageState({
   empty,
   actionLabel,
   onAction,
+  colorScheme,
 }: {
   title: string;
   subtitle?: string;
@@ -17,8 +18,8 @@ export default function PageState({
   empty?: boolean;
   actionLabel?: string;
   onAction?: () => void;
+  colorScheme: "light" | "dark";
 }) {
-  const colorScheme = (useColorScheme() as "light" | "dark") ?? "light";
 
   return (
     <View style={[styles.stateCard, { backgroundColor: colors[colorScheme].elevated, borderColor: colors[colorScheme].border }]}>

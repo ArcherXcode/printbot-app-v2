@@ -45,7 +45,7 @@ export default function LegalLayout() {
           name="privacy-policy"
           options={{
             ...commonHeaderOptions,
-            headerTitleAlign: 'center',
+            headerTitleAlign: 'left',
             title: "Privacy Policy",
           }}
         />
@@ -53,7 +53,7 @@ export default function LegalLayout() {
           name="terms-and-conditions"
           options={{
             ...commonHeaderOptions,
-            headerTitleAlign: 'center',
+            headerTitleAlign: 'left',
             title: "Terms and Conditions",
           }}
         />
@@ -61,7 +61,7 @@ export default function LegalLayout() {
           name="shipping-policy"
           options={{
             ...commonHeaderOptions,
-            headerTitleAlign: 'center',
+            headerTitleAlign: 'left',
             title: "Shipping Policy",
           }}
         />
@@ -69,7 +69,7 @@ export default function LegalLayout() {
           name="return-refund-exchange-policy"
           options={{
             ...commonHeaderOptions,
-            headerTitleAlign: 'center',
+            headerTitleAlign: 'left',
             title: "Return, Refund & Exchange Policy",
           }}
         />

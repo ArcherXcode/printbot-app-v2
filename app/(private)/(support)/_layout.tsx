@@ -1,16 +1,19 @@
-import { Stack, router } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
-import { Feather } from '@expo/vector-icons';
 import { Platform, TouchableOpacity } from 'react-native';
-import { colors } from '@/constants/colors';
+import { ChevronLeft } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
+import { colors } from '@/constants/colors';
 
 
-export default function QueueLayout() {
+export default function NotificationsLayout() {
+    const router = useRouter();
     const colorScheme = useColorScheme() as 'light' | 'dark';
 
     const commonHeaderOptions = {
         headerShown: true,
+        headerBackTitleVisible: true,
+        headerBackVisible: true,
         headerTitleStyle: {
             fontSize: 20,
             fontWeight: 'bold' as const,
@@ -21,23 +24,30 @@ export default function QueueLayout() {
         headerStyle: {
             backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors[colorScheme].headerBackground,
         },
-        headerRight: () => (
-            <TouchableOpacity
-                onPress={() => router.push('/(private)/(notifications)/notifications')}
-            >
-                <Feather name="bell" size={22} color={colors[colorScheme].headerText} />
-            </TouchableOpacity>
-        )
+        headerLeft: () => (
+            Platform.OS === 'ios' && (
+                <TouchableOpacity
+                    onPress={() => router.back()}
+                >
+                    <ChevronLeft
+                        size={24}
+                        color={colors[colorScheme].headerText}
+                    />
+                </TouchableOpacity>
+            )
+        ),
     };
+
     return (
         <>
             <Stack
-                initialRouteName='queue'>
-                <Stack.Screen name="queue"
+                initialRouteName='support'
+            >
+                <Stack.Screen name="support"
                     options={{
                         ...commonHeaderOptions,
                         headerTitleAlign: 'left',
-                        headerTitle: 'Order Queue'
+                        headerTitle: 'Support Center'
                     }}
                 />
             </Stack>

@@ -36,7 +36,7 @@ export default function OrdersLayout() {
             >
                 <Stack.Screen name="orders" options={{
                     ...commonHeaderOptions,
-                    headerTitleAlign: 'center',
+                    headerTitleAlign: 'left',
                     headerTitle: 'Past Orders',
                 }} />
             </Stack>
