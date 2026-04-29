@@ -1,15 +1,17 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import { StyleSheet, Text, View, Pressable, TextInput, Modal, Platform, Alert, ActivityIndicator, Animated, Easing, ScrollView } from "react-native";
+import { StyleSheet, Text, View, Pressable, TextInput, Modal, Platform, Alert, ActivityIndicator, Animated, Easing, ScrollView, TouchableOpacity } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { User, Building2, AlarmClockPlus, KeyRound, SmartphoneNfc, LogOut, ChevronRight, HelpCircle, X, Save, UserPen } from "lucide-react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, Feather } from "@expo/vector-icons";
 import { useAuthStore } from "@/lib/store/auth-store";
+import { defaultRouteForRole } from "@/routes/access";
 import { useMe, useUpdateMe } from "@/lib/assetHooksApis/account/hooks";
 import {
   useChangePasswordMutation,
   useDisableTwoFactorMutation,
   useEnableAuthenticatorTwoFactorMutation,
   useEnableEmailTwoFactorMutation,
+  useLogoutMutation,
   useLogoutAllMutation,
   useSetupAuthenticatorTwoFactorMutation,
 } from "@/lib/assetHooksApis/publicPages/hooks";
@@ -18,7 +20,7 @@ import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/appHooks/useColorScheme";
 import PageState from "@/components/cards/PageState";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 
 // --- Custom Animated Bottom Sheet ---
 function BottomSheet({
@@ -119,12 +121,12 @@ export default function AccountScreen() {
   const theme = colors[colorScheme];
   const router = useRouter();
 
-  const role = useAuthStore((state) => state.role);
-  const sessionUser = useAuthStore((state) => state.user);
+  const { role, user } = useAuthStore();
   const isVendor = (role ?? "USER").toUpperCase() === "VENDOR";
 
   const meQuery = useMe();
   const updateMutation = useUpdateMe();
+  const logoutMutation = useLogoutMutation();
   const logoutAllMutation = useLogoutAllMutation();
   const changePasswordMutation = useChangePasswordMutation();
   const enableEmailTwoFactorMutation = useEnableEmailTwoFactorMutation();
@@ -289,6 +291,52 @@ export default function AccountScreen() {
     }
   };
 
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel', onPress: () => { } },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            await logoutMutation.mutateAsync();
+            router.replace({
+              pathname: "/(public)/login",
+              params: {
+                from: defaultRouteForRole(role, user),
+              },
+            });
+          },
+        },
+      ]
+    );
+  };
+
+  const handleLogoutAll = () => {
+    Alert.alert(
+      "Logout All Sessions",
+      "Are you sure you want to end all active sign-ins across all devices?",
+      [
+        { text: "Cancel", style: "cancel", onPress: () => { } },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: async () => {
+            await logoutAllMutation.mutateAsync();
+            router.replace({
+              pathname: "/(public)/login",
+              params: {
+                from: defaultRouteForRole(role, user),
+              },
+            });
+          },
+        },
+      ]
+    );
+  };
+
   if (meQuery.isLoading) {
     return <View style={[styles.container, { backgroundColor: theme.background }]}><PageState loading title="Loading settings" colorScheme={colorScheme} /></View>;
   }
@@ -301,11 +349,11 @@ export default function AccountScreen() {
     );
   }
 
-  const profileRecord = (meQuery.data ?? sessionUser) as any;
+  const profileRecord = (meQuery.data ?? user) as any;
   const is2FAEnabled = !!(profileRecord?.two_factor_enabled || profileRecord?.is_2fa_enabled || profileRecord?.is_two_factor_enabled);
 
-  const displayName = profileForm.first_name ? `${profileForm.first_name} ${profileForm.last_name}` : sessionUser?.username || "User";
-  const displayPhone = profileForm.phone || sessionUser?.phone || "No phone provided";
+  const displayName = profileForm.first_name ? `${profileForm.first_name} ${profileForm.last_name}` : user?.username || "User";
+  const displayPhone = profileForm.phone || user?.phone || "No phone provided";
 
   // --- UI Renderers ---
 
@@ -362,7 +410,7 @@ export default function AccountScreen() {
       </View>
 
       {/* Inline Profile Details */}
-      <View style={styles.sectionHeaderRow}>
+      <View style={[styles.sectionHeaderRow, { marginTop: 10 }]}>
         <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Profile Details</Text>
         <View style={{ flexDirection: "row", gap: 8 }}>
           {isProfileEditing && (
@@ -404,7 +452,7 @@ export default function AccountScreen() {
         </View>
       </View>
 
-      <View style={[styles.groupContainer, { backgroundColor: theme.elevated, padding: 16, gap: 16 }]}>
+      <View style={[styles.groupContainer, { backgroundColor: theme.elevated, paddingVertical: 16, paddingHorizontal: 12, gap: 16 }]}>
         {renderInput("First Name", profileForm.first_name, (text) => setProfileForm({ ...profileForm, first_name: text }), isProfileEditing)}
         {renderInput("Last Name", profileForm.last_name, (text) => setProfileForm({ ...profileForm, last_name: text }), isProfileEditing)}
         {renderInput("Phone", profileForm.phone, (text) => setProfileForm({ ...profileForm, phone: text }), isProfileEditing, { keyboardType: "phone-pad" })}
@@ -453,7 +501,7 @@ export default function AccountScreen() {
           logoutAllMutation.isPending ? <ActivityIndicator color={theme.danger} /> : <LogOut color={theme.danger} size={22} />,
           "Logout All Sessions",
           "End all active sign-ins across all devices",
-          () => logoutAllMutation.mutateAsync(),
+          () => handleLogoutAll(),
           true,
           false
         )}
@@ -463,6 +511,17 @@ export default function AccountScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+
+      <Stack.Screen options={{
+        headerTitle: "Your Account",
+        headerRight: () => (
+          <TouchableOpacity onPress={() => {
+            handleLogout();
+          }}>
+            <Feather name="log-out" size={20} color="red" />
+          </TouchableOpacity>
+        )
+      }} />
 
       <FlashList
         data={[1] as const}
@@ -616,6 +675,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 24,
     marginBottom: 8,
+    paddingHorizontal: 4,
   },
   sectionTitle: {
     fontSize: 13,

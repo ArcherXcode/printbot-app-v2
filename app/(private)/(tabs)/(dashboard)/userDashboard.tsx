@@ -397,7 +397,7 @@ export default function UserDashboardScreen() {
   );
 
   return (
-    <View style={[styles.screen, { backgroundColor: Platform.OS === "android" ? colors[colorScheme].background : undefined }, screenSafeAreaStyle]}>
+    <View style={[styles.screen, { backgroundColor: colors[colorScheme].background }, screenSafeAreaStyle]}>
       <Stack.Screen
         options={{
           headerRight: () => (
