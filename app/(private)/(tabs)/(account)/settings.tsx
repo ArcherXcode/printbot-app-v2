@@ -563,9 +563,24 @@ export default function AccountScreen() {
       {/* Password Bottom Sheet */}
       <BottomSheet open={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)} title="Change Password" colorScheme={colorScheme}>
         <Text style={[styles.modalDesc, { color: theme.textSecondary }]}>Enter your current password and a new secure passphrase.</Text>
-        {renderInput("Current Password", passwordForm.current_password, (t) => setPasswordForm({ ...passwordForm, current_password: t }), true, { secureTextEntry: true })}
-        {renderInput("New Password", passwordForm.new_password, (t) => setPasswordForm({ ...passwordForm, new_password: t }), true, { secureTextEntry: true })}
-        {renderInput("Confirm New Password", passwordForm.confirm_password, (t) => setPasswordForm({ ...passwordForm, confirm_password: t }), true, { secureTextEntry: true })}
+        <PasswordInput
+          label="Current Password"
+          value={passwordForm.current_password}
+          onChangeText={(t) => setPasswordForm({ ...passwordForm, current_password: t })}
+          colorScheme={colorScheme}
+        />
+        <PasswordInput
+          label="New Password"
+          value={passwordForm.new_password}
+          onChangeText={(t) => setPasswordForm({ ...passwordForm, new_password: t })}
+          colorScheme={colorScheme}
+        />
+        <PasswordInput
+          label="Confirm New Password"
+          value={passwordForm.confirm_password}
+          onChangeText={(t) => setPasswordForm({ ...passwordForm, confirm_password: t })}
+          colorScheme={colorScheme}
+        />
 
         <Pressable style={[styles.primaryBtn, { backgroundColor: theme.primary }]} onPress={handleChangePassword} disabled={changePasswordMutation.isPending}>
           {changePasswordMutation.isPending ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryBtnText}>Save Password</Text>}
@@ -632,6 +647,51 @@ export default function AccountScreen() {
           </View>
         )}
       </BottomSheet>
+    </View>
+  );
+}
+
+function PasswordInput({
+  label,
+  value,
+  onChangeText,
+  colorScheme,
+}: {
+  label: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  colorScheme: "light" | "dark";
+}) {
+  const [isVisible, setIsVisible] = useState(false);
+  const theme = colors[colorScheme];
+
+  return (
+    <View style={styles.inputContainer}>
+      <Text style={[styles.label, { color: theme.textSecondary }]}>{label}</Text>
+      <View style={styles.passwordInputWrapper}>
+        <TextInput
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.background,
+              color: theme.textPrimary,
+              borderColor: colorScheme === "dark" ? "#52525B" : "#A1A1AA",
+              outlineStyle: "none",
+              paddingRight: 48,
+            } as any
+          ]}
+          value={value}
+          onChangeText={onChangeText}
+          secureTextEntry={!isVisible}
+          placeholderTextColor={theme.textSecondary}
+        />
+        <Pressable
+          style={styles.eyeButton}
+          onPress={() => setIsVisible(!isVisible)}
+        >
+          <Feather name={isVisible ? "eye" : "eye-off"} size={16} color={theme.textSecondary} />
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -735,6 +795,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 14,
     fontSize: 15,
+  },
+  passwordInputWrapper: {
+    justifyContent: 'center',
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: 0,
+    height: '100%',
+    width: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modalDesc: {
     fontSize: 14,

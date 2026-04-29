@@ -19,7 +19,7 @@ import * as Location from "expo-location";
 import { useRouter, Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlashList } from "@shopify/flash-list";
-import { PackageOpen, Star } from "lucide-react-native";
+import { PackageOpen, Star, Store } from "lucide-react-native";
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
 
 import { colors } from "@/constants/colors";
@@ -439,7 +439,6 @@ export default function UserDashboardScreen() {
                 tintColor={colors[colorScheme].primary}
                 colors={[colors[colorScheme].primary]}
                 progressBackgroundColor={colors[colorScheme].surface}
-                progressViewOffset={Platform.OS === "ios" ? insets.top + 55 : 0}
               />
             }
             ItemSeparatorComponent={() => <View style={styles.itemGap} />}
@@ -447,11 +446,20 @@ export default function UserDashboardScreen() {
             onEndReachedThreshold={0.55}
             ListEmptyComponent={
               vendorsQuery.isLoading ? (
-                <PageState title="Loading vendors" colorScheme={colorScheme} loading />
+                <View style={styles.emptyContainer}>
+                  <ActivityIndicator size="large" color={colors[colorScheme].primary} />
+                  <Text style={{ color: colors[colorScheme].textSecondary, marginTop: 16 }}>Loading print shops...</Text>
+                </View>
               ) : vendorsQuery.isError ? (
-                <PageState title="Unable to load print shops" subtitle="Please retry print shop discovery." colorScheme={colorScheme} />
+                <View style={styles.emptyContainer}>
+                  <PageState title="Unable to load print shops" subtitle="Please retry print shop discovery." colorScheme={colorScheme} />
+                </View>
               ) : (
-                <PageState title="No print shops found" subtitle="Try adjusting your search criteria." colorScheme={colorScheme} icon />
+                <View style={styles.emptyContainer}>
+                  <Store size={40} color={colors[colorScheme].textSecondary || colors[colorScheme].border} style={{ marginBottom: 16 }} />
+                  <Text style={[styles.emptyTitle, { color: colors[colorScheme].textPrimary }]}>No print shops found</Text>
+                  <Text style={[styles.emptySub, { color: colors[colorScheme].textSecondary }]}>Try adjusting your search criteria.</Text>
+                </View>
               )
             }
             ListFooterComponent={
@@ -518,11 +526,11 @@ function PageState({
   colorScheme: "light" | "dark";
 }) {
   return (
-    <View style={[styles.stateCard, { backgroundColor: colors[colorScheme].elevated, borderColor: colors[colorScheme].border }]}>
-      {loading ? <ActivityIndicator color={colors[colorScheme].primary} /> : null}
-      {icon && !loading ? <PackageOpen size={34} color={colors[colorScheme].textSecondary} strokeWidth={1.9} /> : null}
-      <Text style={[styles.stateTitle, { color: colors[colorScheme].textPrimary }]}>{title}</Text>
-      {subtitle ? <Text style={[styles.stateSubtitle, { color: colors[colorScheme].textSecondary }]}>{subtitle}</Text> : null}
+    <View style={styles.emptyContainer}>
+      {loading ? <ActivityIndicator size="large" color={colors[colorScheme].primary} /> : null}
+      {icon && !loading ? <Store size={40} color={colors[colorScheme].textSecondary} style={{ marginBottom: 16 }} /> : null}
+      <Text style={[styles.emptyTitle, { color: colors[colorScheme].textPrimary, marginTop: loading || icon ? 16 : 0 }]}>{title}</Text>
+      {subtitle ? <Text style={[styles.emptySub, { color: colors[colorScheme].textSecondary }]}>{subtitle}</Text> : null}
     </View>
   );
 }
@@ -577,6 +585,13 @@ function FiltersModal({
   const [sheetVisible, setSheetVisible] = useState(open);
   const progress = useRef(new Animated.Value(open ? 1 : 0)).current;
 
+  useEffect(() => {
+    const listenerId = progress.addListener(() => {});
+    return () => {
+      progress.removeListener(listenerId);
+    };
+  }, [progress]);
+
   const animateTo = useCallback(
     (toValue: 0 | 1, onFinished?: () => void) => {
       Animated.timing(progress, {
@@ -618,7 +633,7 @@ function FiltersModal({
   });
   const sheetTranslateY = progress.interpolate({
     inputRange: [0, 1],
-    outputRange: [420, 0],
+    outputRange: [600, 0],
   });
 
   return (
@@ -652,35 +667,37 @@ function FiltersModal({
             </View>
           </View>
 
-          <FilterInput label="Search" value={search} placeholder="Search print shops" colorScheme={colorScheme} onChangeText={onSearchChange} />
-          <FilterInput
-            label="Radius (km)"
-            value={radiusKm}
-            placeholder="10"
-            keyboardType="number-pad"
-            colorScheme={colorScheme}
-            onChangeText={onRadiusChange}
-          />
-          <FilterInput
-            label="Min rating"
-            value={minRating}
-            placeholder="3.5"
-            keyboardType="decimal-pad"
-            colorScheme={colorScheme}
-            onChangeText={onRatingChange}
-          />
+          <View style={styles.sheetContent}>
+            <FilterInput label="Search" value={search} placeholder="Search print shops" colorScheme={colorScheme} onChangeText={onSearchChange} />
+            <FilterInput
+              label="Radius (km)"
+              value={radiusKm}
+              placeholder="10"
+              keyboardType="number-pad"
+              colorScheme={colorScheme}
+              onChangeText={onRadiusChange}
+            />
+            <FilterInput
+              label="Min rating"
+              value={minRating}
+              placeholder="3.5"
+              keyboardType="decimal-pad"
+              colorScheme={colorScheme}
+              onChangeText={onRatingChange}
+            />
 
-          <View style={[styles.switchRow, { borderColor: colors[colorScheme].border }]}>
-            <View>
-              <Text style={[styles.switchTitle, { color: colors[colorScheme].textPrimary }]}>Open now only</Text>
-              <Text style={[styles.switchHint, { color: colors[colorScheme].textSecondary }]}>Hide shops that are currently closed.</Text>
+            <View style={[styles.switchRow, { borderColor: colors[colorScheme].border }]}>
+              <View>
+                <Text style={[styles.switchTitle, { color: colors[colorScheme].textPrimary }]}>Open now only</Text>
+                <Text style={[styles.switchHint, { color: colors[colorScheme].textSecondary }]}>Hide shops that are currently closed.</Text>
+              </View>
+              <Switch value={isOpenOnly} onValueChange={onOpenOnlyChange} />
             </View>
-            <Switch value={isOpenOnly} onValueChange={onOpenOnlyChange} />
-          </View>
 
-          <Pressable style={({ pressed }) => [styles.doneButton, { backgroundColor: colors[colorScheme].primary, opacity: pressed ? 0.82 : 1 }]} onPress={closeSheet}>
-            <Text style={styles.primaryButtonText}>Apply filters</Text>
-          </Pressable>
+            <Pressable style={({ pressed }) => [styles.doneButton, { backgroundColor: colors[colorScheme].primary, opacity: pressed ? 0.82 : 1 }]} onPress={closeSheet}>
+              <Text style={styles.primaryButtonText}>Apply filters</Text>
+            </Pressable>
+          </View>
         </Animated.View>
       </Animated.View>
     </Modal>
@@ -753,24 +770,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
   },
-  stateCard: {
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 18,
-    borderWidth: 1,
-    borderStyle: "dashed",
-    gap: 8,
-    minHeight: 258,
-    padding: 24,
+  emptyContainer: {
+    padding: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  stateTitle: {
-    fontSize: 15,
-    fontWeight: "700",
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
     textAlign: "center",
   },
-  stateSubtitle: {
-    fontSize: 12,
-    textAlign: "center",
+  emptySub: {
+    fontSize: 14,
+    textAlign: 'center',
   },
   itemGap: {
     height: 12,
@@ -847,58 +860,66 @@ const styles = StyleSheet.create({
   filterSheet: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    borderWidth: 1,
-    padding: 18,
-    paddingBottom: 28,
-    gap: 16,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    minHeight: 400,
+    maxHeight: "90%",
   },
   filterHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    paddingHorizontal: 24,
+    paddingVertical: 20,
   },
   filterHeaderActions: {
     flexDirection: "row",
     alignItems: "center",
   },
   filterTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "800",
+  },
+  sheetContent: {
+    padding: 24,
+    paddingTop: 4,
+    gap: 16,
   },
   filterField: {
     gap: 7,
   },
   filterLabel: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 4,
+    textTransform: "uppercase",
   },
   filterInput: {
-    minHeight: 46,
-    borderRadius: 12,
     borderWidth: 1,
-    paddingHorizontal: 12,
-    fontSize: 15,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 48,
+    fontSize: 16,
   },
   switchRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 12,
-    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
   },
   switchTitle: {
-    fontSize: 14,
-    fontWeight: "800",
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 2,
   },
   switchHint: {
-    marginTop: 3,
     fontSize: 11,
   },
   doneButton: {
-    minHeight: 48,
-    borderRadius: 13,
+    padding: 16,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
   },
