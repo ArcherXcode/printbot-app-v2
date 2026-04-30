@@ -55,7 +55,7 @@ function BottomSheet({
   const progress = useRef(new Animated.Value(open ? 1 : 0)).current;
 
   useEffect(() => {
-    const listenerId = progress.addListener(() => {});
+    const listenerId = progress.addListener(() => { });
     return () => {
       progress.removeListener(listenerId);
     };
@@ -229,7 +229,6 @@ export default function PaymentsScreen() {
 
     setRefreshCooling(true);
     setPage(1);
-    setAccumulatedItems([]);
 
     void activeQuery.refetch().finally(() => {
       setTimeout(() => setRefreshCooling(false), 1200);
@@ -324,6 +323,8 @@ export default function PaymentsScreen() {
   };
 
   const ListEmptyComponent = () => {
+    if (isListRefreshing) return null;
+
     if (activeQuery.isLoading && accumulatedItems.length === 0) {
       return (
         <View style={styles.emptyContainer}>
@@ -336,7 +337,7 @@ export default function PaymentsScreen() {
     if (activeQuery.isError && accumulatedItems.length === 0) {
       const errorStr = String(activeQuery.error);
       const isUnavailable = errorStr.includes("403") || errorStr.includes("404");
-      
+
       if (isUnavailable) {
         return (
           <View style={styles.emptyContainer}>
@@ -371,7 +372,7 @@ export default function PaymentsScreen() {
 
   const screenSafeAreaStyle = useMemo(
     () => ({
-      paddingTop: Platform.OS === "ios" ? insets.top + 55 : 0,
+      paddingTop: Platform.OS === "ios" ? insets.top + 60 : 0,
       paddingBottom: Platform.OS === "ios" ? insets.bottom + 20 : 8,
     }),
     [insets.bottom, insets.left, insets.right, insets.top],
@@ -381,7 +382,7 @@ export default function PaymentsScreen() {
     <View style={[styles.container, { backgroundColor: theme.background }, screenSafeAreaStyle]}>
       <Stack.Screen
         options={{
-          headerTitle: "Payments",
+          headerTitle: "Payment History",
           headerRight: () => (
             <View style={[styles.headerActions, { paddingHorizontal: 10, gap: Platform.OS === "ios" ? 16 : 20 }]}>
               <TouchableOpacity
@@ -417,8 +418,8 @@ export default function PaymentsScreen() {
             <RefreshControl
               refreshing={isListRefreshing}
               onRefresh={refreshPayments}
-              tintColor={theme.primary}
-              colors={[theme.primary]}
+              tintColor={theme.textPrimary}
+              colors={[theme.textPrimary]}
               progressBackgroundColor={theme.surface}
             />
           }
@@ -457,21 +458,21 @@ export default function PaymentsScreen() {
       >
         <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Status</Text>
         <View style={{ gap: 8, flexDirection: 'row', flexWrap: 'wrap', marginBottom: 16 }}>
-          {[{label: 'All', value: 'all'}, ...statusOptions].map(option => {
+          {[{ label: 'All', value: 'all' }, ...statusOptions].map(option => {
             const isSelected = tempStatusFilter === option.value;
             return (
               <TouchableOpacity
                 key={option.value}
                 style={[
                   styles.chipOption,
-                  { 
-                    backgroundColor: isSelected ? theme.primary : theme.background, 
-                    borderColor: isSelected ? theme.primary : theme.border 
+                  {
+                    backgroundColor: isSelected ? theme.primary : theme.background,
+                    borderColor: isSelected ? theme.primary : theme.border
                   }
                 ]}
                 onPress={() => setTempStatusFilter(option.value)}
               >
-                <Text style={{ 
+                <Text style={{
                   color: isSelected ? '#fff' : theme.textPrimary,
                   fontWeight: isSelected ? '600' : '400',
                   fontSize: 14

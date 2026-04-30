@@ -306,7 +306,6 @@ export default function UserDashboardScreen() {
     }
 
     setRefreshCooling(true);
-    setLoadedVendors([]);
     lastAppliedPageRef.current = 0;
 
     if (page === 1) {
@@ -437,8 +436,8 @@ export default function UserDashboardScreen() {
               <RefreshControl
                 refreshing={isListRefreshing}
                 onRefresh={refreshVendors}
-                tintColor={colors[colorScheme].primary}
-                colors={[colors[colorScheme].primary]}
+                tintColor={colors[colorScheme].textPrimary}
+                colors={[colors[colorScheme].textPrimary]}
                 progressBackgroundColor={colors[colorScheme].surface}
               />
             }
@@ -446,7 +445,7 @@ export default function UserDashboardScreen() {
             onEndReached={loadNextPage}
             onEndReachedThreshold={0.55}
             ListEmptyComponent={
-              vendorsQuery.isLoading ? (
+              isListRefreshing ? null : vendorsQuery.isLoading ? (
                 <View style={styles.emptyContainer}>
                   <ActivityIndicator size="large" color={colors[colorScheme].primary} />
                   <Text style={{ color: colors[colorScheme].textSecondary, marginTop: 16 }}>Loading print shops...</Text>
@@ -571,7 +570,7 @@ function FiltersModal({
   const progress = useRef(new Animated.Value(open ? 1 : 0)).current;
 
   useEffect(() => {
-    const listenerId = progress.addListener(() => {});
+    const listenerId = progress.addListener(() => { });
     return () => {
       progress.removeListener(listenerId);
     };

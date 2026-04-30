@@ -31,14 +31,14 @@ type DashboardSection =
   | { key: "metrics"; type: "metrics" }
   | { key: "ordersTrend"; type: "lineChart"; title: string; description: string; points: ChartPoint[]; tone: "primary" | "secondary" }
   | {
-      key: "revenueTrend";
-      type: "lineChart";
-      title: string;
-      description: string;
-      points: ChartPoint[];
-      tone: "primary" | "secondary";
-      valueFormatter: (value: number) => string;
-    }
+    key: "revenueTrend";
+    type: "lineChart";
+    title: string;
+    description: string;
+    points: ChartPoint[];
+    tone: "primary" | "secondary";
+    valueFormatter: (value: number) => string;
+  }
   | { key: "ordersByHour"; type: "lineChart"; title: string; description: string; points: ChartPoint[]; tone: "primary" | "secondary" }
   | { key: "status"; type: "statusBars"; title: string; description: string; entries: StatusEntry[] };
 
@@ -154,13 +154,13 @@ export default function VendorDashboardScreen() {
       <Stack.Screen
         options={{
           headerRight: () => (
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityLabel="View notifications"
-                onPress={() => router.push("/(private)/(notifications)/notifications")}
-              >
-                <MaterialIcons name="notifications-none" size={24} color={colors[colorScheme].textPrimary} />
-              </TouchableOpacity>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="View notifications"
+              onPress={() => router.push("/(private)/(notifications)/notifications")}
+            >
+              <MaterialIcons name="notifications-none" size={24} color={colors[colorScheme].textPrimary} />
+            </TouchableOpacity>
           ),
         }}
       />
@@ -169,7 +169,7 @@ export default function VendorDashboardScreen() {
         data={sections}
         keyExtractor={(item) => item.key}
         renderItem={renderSection}
-        contentContainerStyle={[styles.listContent, Platform.OS === "ios" ? screenSafeAreaStyle : {paddingVertical: 8}]}
+        contentContainerStyle={[styles.listContent, Platform.OS === "ios" ? screenSafeAreaStyle : { paddingVertical: 8 }]}
         bounces
         alwaysBounceVertical
         showsVerticalScrollIndicator={false}
@@ -177,15 +177,15 @@ export default function VendorDashboardScreen() {
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={handleRefresh}
-            tintColor={colors[colorScheme].primary}
-            colors={[colors[colorScheme].primary]}
+            tintColor={colors[colorScheme].textPrimary}
+            colors={[colors[colorScheme].textPrimary]}
             progressBackgroundColor={colors[colorScheme].surface}
             progressViewOffset={Platform.OS === "ios" ? insets.top + 55 : 0}
           />
         }
         ItemSeparatorComponent={() => <View style={styles.sectionGap} />}
         ListEmptyComponent={
-          dashboardQuery.isLoading ? (
+          isRefreshing ? null : dashboardQuery.isLoading ? (
             <PageState title="Loading vendor dashboard" loading colorScheme={colorScheme} />
           ) : dashboardQuery.isError ? (
             <PageState

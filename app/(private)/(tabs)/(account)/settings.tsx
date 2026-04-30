@@ -530,6 +530,8 @@ export default function AccountScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.listContent, Platform.OS === "ios" ? screenSafeAreaStyle : { paddingVertical: 12 }]}
         renderItem={renderContent}
+        bounces
+        alwaysBounceVertical
       />
 
       {/* Company Info Bottom Sheet */}

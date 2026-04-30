@@ -60,7 +60,7 @@ function BottomSheet({
   const progress = useRef(new Animated.Value(open ? 1 : 0)).current;
 
   useEffect(() => {
-    const listenerId = progress.addListener(() => {});
+    const listenerId = progress.addListener(() => { });
     return () => {
       progress.removeListener(listenerId);
     };
@@ -232,7 +232,6 @@ export default function OrdersScreen() {
 
     setRefreshCooling(true);
     setPage(1);
-    setAccumulatedItems([]);
 
     void activeQuery.refetch().finally(() => {
       setTimeout(() => setRefreshCooling(false), 1200);
@@ -358,6 +357,8 @@ export default function OrdersScreen() {
   };
 
   const ListEmptyComponent = () => {
+    if (isListRefreshing) return null;
+
     if (activeQuery.isLoading && accumulatedItems.length === 0) {
       return (
         <View style={styles.emptyContainer}>
@@ -438,8 +439,8 @@ export default function OrdersScreen() {
             <RefreshControl
               refreshing={isListRefreshing}
               onRefresh={refreshOrders}
-              tintColor={theme.primary}
-              colors={[theme.primary]}
+              tintColor={theme.textPrimary}
+              colors={[theme.textPrimary]}
               progressBackgroundColor={theme.surface}
             />
           }
@@ -487,9 +488,9 @@ export default function OrdersScreen() {
                   );
                 }}
               >
-                <Text style={{ 
+                <Text style={{
                   color: theme.textPrimary,
-                  fontWeight: '400' 
+                  fontWeight: '400'
                 }}>
                   {option.label}
                 </Text>

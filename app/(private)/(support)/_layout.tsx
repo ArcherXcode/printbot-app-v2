@@ -1,7 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
-import { Platform, TouchableOpacity } from 'react-native';
-import { ChevronLeft } from 'lucide-react-native';
+import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { colors } from '@/constants/colors';
 
@@ -23,19 +22,7 @@ export default function NotificationsLayout() {
         headerShadowVisible: false,
         headerStyle: {
             backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors[colorScheme].headerBackground,
-        },
-        headerLeft: () => (
-            Platform.OS === 'ios' && (
-                <TouchableOpacity
-                    onPress={() => router.back()}
-                >
-                    <ChevronLeft
-                        size={24}
-                        color={colors[colorScheme].headerText}
-                    />
-                </TouchableOpacity>
-            )
-        ),
+        }
     };
 
     return (
@@ -47,9 +34,18 @@ export default function NotificationsLayout() {
                     options={{
                         ...commonHeaderOptions,
                         headerTitleAlign: 'left',
-                        headerTitle: 'Support Center'
+                        headerTitle: 'Ticket Center'
                     }}
                 />
+                <Stack.Screen name="create"
+                    options={{
+                        ...commonHeaderOptions,
+                        headerBackVisible: Platform.OS === 'ios' ? false : true,
+                        headerTitleAlign: 'left',
+                        headerTitle: 'Create a Ticket'
+                    }}
+                />
+
             </Stack>
             <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         </>
