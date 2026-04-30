@@ -2,6 +2,7 @@ import { Image, Pressable, StyleSheet, Text, View, useColorScheme } from 'react-
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
+import * as Haptics from "expo-haptics";
 
 export default function SignupSelect() {
     const router = useRouter();
@@ -49,7 +50,10 @@ export default function SignupSelect() {
 
                 {/* Signup as User — filled */}
                 <Pressable
-                    onPress={() => router.push('/(public)/signupUser')}
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        router.push('/(public)/signupUser')
+                    }}
                     style={({ pressed }) => [
                         styles.filledButton,
                         pressed && styles.buttonPressed,
@@ -67,7 +71,10 @@ export default function SignupSelect() {
 
                 {/* Signup as Business — outline */}
                 <Pressable
-                    onPress={() => router.push('/(public)/signupVendor')}
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        router.push('/(public)/signupVendor')
+                    }}
                     style={({ pressed }) => [
                         styles.outlineButton,
                         isDark ? styles.outlineButtonDark : styles.outlineButtonLight,
@@ -84,7 +91,10 @@ export default function SignupSelect() {
                     <Text style={[styles.loginLabel, isDark ? styles.loginLabelDark : styles.loginLabelLight]}>
                         Already have an account?{' '}
                     </Text>
-                    <Pressable onPress={() => router.push('/(public)/login')}>
+                    <Pressable onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        router.push('/(public)/login')
+                    }}>
                         <Text style={[styles.loginLink, isDark ? styles.loginLinkDark : styles.loginLinkLight]}>
                             Log in
                         </Text>
@@ -97,7 +107,10 @@ export default function SignupSelect() {
                         By continuing, you agree to PrintBot's
                     </Text>
                     <View style={styles.termsRow}>
-                        <Pressable onPress={() => router.push('/(legal)/terms-and-conditions')}>
+                        <Pressable onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            router.push('/(legal)/terms-and-conditions')
+                        }}>
                             <Text style={[styles.termsLink, isDark ? styles.termsLinkDark : styles.termsLinkLight]}>
                                 Terms of Service
                             </Text>
@@ -105,7 +118,10 @@ export default function SignupSelect() {
                         <Text style={[styles.termsText, isDark ? styles.termsTextDark : styles.termsTextLight]}>
                             {' '}and{' '}
                         </Text>
-                        <Pressable onPress={() => router.push('/(legal)/privacy-policy')}>
+                        <Pressable onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            router.push('/(legal)/privacy-policy')
+                        }}>
                             <Text style={[styles.termsLink, isDark ? styles.termsLinkDark : styles.termsLinkLight]}>
                                 Privacy Policy
                             </Text>

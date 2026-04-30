@@ -17,7 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-
+import * as Haptics from "expo-haptics";
 import { requestPasswordResetSchema } from '@/lib/assetHooksApis/publicPages/types';
 import { useRequestPasswordResetMutation } from '@/lib/assetHooksApis/publicPages/hooks';
 
@@ -103,7 +103,10 @@ export default function RequestResetPasswordScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* ── Back button ── */}
-          <Pressable onPress={() => router.back()} style={styles.backButton} hitSlop={12}>
+          <Pressable onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.back()
+          }} style={styles.backButton} hitSlop={12}>
             <Feather name="arrow-left" size={22} color={colors.heading} />
           </Pressable>
 
@@ -147,10 +150,13 @@ export default function RequestResetPasswordScreen() {
                 </Text>
 
                 <Pressable
-                  onPress={() => router.push({
-                    pathname: '/(public)/confirmResetPassword',
-                    params: { email },
-                  })}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push({
+                      pathname: '/(public)/confirmResetPassword',
+                      params: { email },
+                    })
+                  }}
                   style={({ pressed }) => [styles.ctaButton, pressed && styles.ctaButtonPressed]}
                 >
                   <LinearGradient
@@ -163,7 +169,10 @@ export default function RequestResetPasswordScreen() {
                   </LinearGradient>
                 </Pressable>
 
-                <Pressable onPress={() => { setSubmitted(false); resetMutation.reset(); }} hitSlop={8}>
+                <Pressable onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setSubmitted(false); resetMutation.reset();
+                }} hitSlop={8}>
                   <Text style={[styles.resendLink, { color: colors.subheading }]}>
                     Didn't receive it? <Text style={{ fontWeight: '600', color: colors.heading }}>Resend</Text>
                   </Text>
@@ -213,7 +222,10 @@ export default function RequestResetPasswordScreen() {
                 </View>
 
                 <Pressable
-                  onPress={handleSubmit}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    handleSubmit()
+                  }}
                   disabled={isLoading}
                   style={({ pressed }) => [
                     styles.ctaButton,
@@ -243,7 +255,10 @@ export default function RequestResetPasswordScreen() {
             <Text style={[styles.loginLabel, { color: colors.subheading }]}>
               Remember your password?{' '}
             </Text>
-            <Pressable onPress={() => router.replace('/(public)/login')}>
+            <Pressable onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.replace('/(public)/login')
+            }}>
               <Text style={[styles.loginLink, { color: colors.heading }]}>
                 Log in
               </Text>

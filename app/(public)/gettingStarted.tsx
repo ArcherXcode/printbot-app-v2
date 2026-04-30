@@ -2,6 +2,7 @@ import { Image, Pressable, StyleSheet, Text, View, useColorScheme } from 'react-
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
+import * as Haptics from "expo-haptics";
 
 export default function GettingStarted() {
   const router = useRouter();
@@ -54,7 +55,10 @@ export default function GettingStarted() {
 
         {/* Get Started button */}
         <Pressable
-          onPress={() => router.push('/(public)/signupSelect')}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(public)/signupSelect')
+          }}
           style={({ pressed }) => [
             styles.ctaButton,
             pressed && styles.ctaButtonPressed,
@@ -75,7 +79,10 @@ export default function GettingStarted() {
           <Text style={[styles.loginLabel, isDark ? styles.loginLabelDark : styles.loginLabelLight]}>
             Have a PrintBot Account?{' '}
           </Text>
-          <Pressable onPress={() => router.replace('/(public)/login')}>
+          <Pressable onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.replace('/(public)/login')
+          }}>
             <Text style={[styles.loginLink, isDark ? styles.loginLinkDark : styles.loginLinkLight]}>
               Log in
             </Text>
@@ -88,7 +95,10 @@ export default function GettingStarted() {
             By continuing, you agree to PrintBot's
           </Text>
           <View style={styles.termsRow}>
-            <Pressable onPress={() => router.push('/(legal)/terms-and-conditions')}>
+            <Pressable onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/(legal)/terms-and-conditions')
+            }}>
               <Text style={[styles.termsLink, isDark ? styles.termsLinkDark : styles.termsLinkLight]}>
                 Terms of Service
               </Text>
@@ -96,7 +106,10 @@ export default function GettingStarted() {
             <Text style={[styles.termsText, isDark ? styles.termsTextDark : styles.termsTextLight]}>
               {' '}and{' '}
             </Text>
-            <Pressable onPress={() => router.push('/(legal)/privacy-policy')}>
+            <Pressable onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/(legal)/privacy-policy')
+            }}>
               <Text style={[styles.termsLink, isDark ? styles.termsLinkDark : styles.termsLinkLight]}>
                 Privacy Policy
               </Text>

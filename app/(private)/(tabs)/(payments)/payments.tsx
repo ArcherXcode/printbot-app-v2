@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Clock, CreditCard } from "lucide-react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
+import * as Haptics from "expo-haptics";
 
 // --- Helpers ---
 function asString(value: unknown, fallback = "-"): string {
@@ -388,14 +389,20 @@ export default function PaymentsScreen() {
               <TouchableOpacity
                 accessibilityRole="button"
                 accessibilityLabel="Open filters"
-                onPress={() => setFiltersOpen(true)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setFiltersOpen(true)
+                }}
               >
                 <MaterialIcons name="filter-list" size={24} color={theme.textPrimary} />
               </TouchableOpacity>
               <TouchableOpacity
                 accessibilityRole="button"
                 accessibilityLabel="View notifications"
-                onPress={() => router.push("/(private)/(notifications)/notifications" as any)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push("/(private)/(notifications)/notifications" as any)
+                }}
               >
                 <MaterialIcons name="notifications-none" size={24} color={theme.textPrimary} />
               </TouchableOpacity>
@@ -437,8 +444,12 @@ export default function PaymentsScreen() {
 
       <BottomSheet
         open={filtersOpen}
-        onClose={() => setFiltersOpen(false)}
+        onClose={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          setFiltersOpen(false)
+        }}
         onApply={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           setStatusFilter(tempStatusFilter);
           setFromFilter(tempFromFilter);
           setToFilter(tempToFilter);
@@ -447,6 +458,7 @@ export default function PaymentsScreen() {
           setFiltersOpen(false);
         }}
         onClear={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           setTempStatusFilter("all");
           setTempFromFilter("");
           setTempToFilter("");

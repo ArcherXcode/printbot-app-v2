@@ -4,7 +4,7 @@ import { Platform, TouchableOpacity } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
 import { colors } from '@/constants/colors';
-
+import * as Haptics from "expo-haptics";
 
 export default function NotificationsLayout() {
     const router = useRouter();
@@ -27,7 +27,10 @@ export default function NotificationsLayout() {
         headerLeft: () => (
             Platform.OS === 'ios' && (
                 <TouchableOpacity
-                    onPress={() => router.back()}
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        router.back()
+                    }}
                 >
                     <ChevronLeft
                         size={24}

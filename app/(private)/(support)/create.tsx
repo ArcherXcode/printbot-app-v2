@@ -8,6 +8,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import { z } from "zod";
 import { ChevronLeft } from "lucide-react-native";
+import * as Haptics from "expo-haptics";
 
 function toSentenceCase(value: string): string {
   const normalized = value.replaceAll("_", " ").trim();
@@ -244,7 +245,10 @@ export default function CreateSupportTicketScreen() {
           headerLeft: () => (
             Platform.OS === 'ios' && (
               <TouchableOpacity
-                onPress={() => router.back()}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.back()
+                }}
               >
                 <ChevronLeft
                   size={24}
@@ -353,7 +357,10 @@ export default function CreateSupportTicketScreen() {
           <TouchableOpacity
             style={[styles.submitButton, { backgroundColor: theme.primary, opacity: isSubmittingForm || createMutation.isPending ? 0.7 : 1 }]}
             disabled={isSubmittingForm || createMutation.isPending}
-            onPress={submitTicket}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              submitTicket()
+            }}
           >
             {isSubmittingForm || createMutation.isPending ? (
               <ActivityIndicator color="#fff" />
@@ -383,7 +390,10 @@ export default function CreateSupportTicketScreen() {
                     borderColor: isSelected ? theme.primary : theme.border
                   }
                 ]}
-                onPress={() => selectModalConfig.onSelect(option.value)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  selectModalConfig.onSelect(option.value)
+                }}
               >
                 <Text style={{
                   color: theme.textPrimary,

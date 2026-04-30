@@ -5,6 +5,7 @@ import { TouchableOpacity } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { Platform } from 'react-native';
+import * as Haptics from "expo-haptics";
 
 export default function LegalLayout() {
   const router = useRouter();
@@ -24,7 +25,10 @@ export default function LegalLayout() {
     },
     headerLeft: () => (
       <TouchableOpacity
-        onPress={() => router.back()}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          router.back()
+        }}
       >
         <ChevronLeft
           size={24}

@@ -30,6 +30,7 @@ import type { VendorQueryParams } from "@/lib/assetHooksApis/cataloge/api";
 import { useDebouncedValue } from "@/hooks/queryHooks/useDebouncedValue";
 import { usePaginationParams } from "@/hooks/queryHooks/usePaginationParams";
 import { useAuthStore } from "@/lib/store/auth-store";
+import * as Haptics from "expo-haptics";
 
 type LocationState = {
   lat: number;
@@ -116,7 +117,10 @@ function IOSLocationButton({
 }) {
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => {
+        onPress()
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }}
       style={({ pressed }) => [
         styles.iosButton,
         pressed && styles.iosButtonPressed,
@@ -147,7 +151,10 @@ function AndroidFAB({
 }) {
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onPress();
+      }}
       style={({ pressed }) => [styles.fab, pressed && styles.fabPressed, { backgroundColor: colors[colorScheme].tabPill },]}
       android_ripple={{ color: 'rgba(255,255,255,0.3)', borderless: true, radius: 28 }}
     >
@@ -405,14 +412,20 @@ export default function UserDashboardScreen() {
               <TouchableOpacity
                 accessibilityRole="button"
                 accessibilityLabel="Open filters"
-                onPress={() => setFiltersOpen(true)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setFiltersOpen(true)
+                }}
               >
                 <MaterialIcons name="filter-list" size={24} color={colors[colorScheme].textPrimary} />
               </TouchableOpacity>
               <TouchableOpacity
                 accessibilityRole="button"
                 accessibilityLabel="View notifications"
-                onPress={() => router.push("/(private)/(notifications)/notifications")}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push("/(private)/(notifications)/notifications")
+                }}
               >
                 <MaterialIcons name="notifications-none" size={24} color={colors[colorScheme].textPrimary} />
               </TouchableOpacity>
@@ -623,7 +636,10 @@ function FiltersModal({
   return (
     <Modal visible={sheetVisible} animationType="none" transparent onRequestClose={closeSheet}>
       <Animated.View style={[styles.modalBackdrop, { opacity: backdropOpacity }]}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={closeSheet} />
+        <Pressable style={StyleSheet.absoluteFill} onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          closeSheet
+        }} />
         <Animated.View
           style={[
             styles.filterSheet,
@@ -638,13 +654,19 @@ function FiltersModal({
           <View style={styles.filterHeader}>
             <Text style={[styles.filterTitle, { color: colors[colorScheme].textPrimary }]}>Filter Shops</Text>
             <View style={[styles.filterHeaderActions, { gap: Platform.OS === "ios" ? 14 : 18 }]}>
-              <Pressable onPress={onClear}>
+              <Pressable onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onClear()
+              }}>
                 <MaterialIcons name="filter-list-off" size={24} color={colors[colorScheme].textPrimary} />
               </Pressable>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Close filters"
-                onPress={closeSheet}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  closeSheet
+                }}
               >
                 <MaterialIcons name="close" size={24} color={colors[colorScheme].textPrimary} />
               </Pressable>
@@ -678,7 +700,10 @@ function FiltersModal({
               <Switch value={isOpenOnly} onValueChange={onOpenOnlyChange} />
             </View>
 
-            <Pressable style={({ pressed }) => [styles.doneButton, { backgroundColor: colors[colorScheme].primary, opacity: pressed ? 0.82 : 1 }]} onPress={closeSheet}>
+            <Pressable style={({ pressed }) => [styles.doneButton, { backgroundColor: colors[colorScheme].primary, opacity: pressed ? 0.82 : 1 }]} onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              closeSheet
+            }}>
               <Text style={styles.primaryButtonText}>Apply filters</Text>
             </Pressable>
           </View>

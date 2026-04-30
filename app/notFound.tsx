@@ -3,14 +3,18 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  useColorScheme,
   Image,
+  TouchableOpacity,
+  Platform
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router';
+import * as Haptics from "expo-haptics";
+import { Stack, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import { ChevronLeft } from 'lucide-react-native';
+import { colors } from '@/constants/colors';
+import { useColorScheme } from "@/hooks/appHooks/useColorScheme";
 
 /* ──────────────────────────────────────────
    Color builder (shared design token pattern)
@@ -42,8 +46,24 @@ export default function NotFoundScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
-
+      <Stack.Screen options={{
+        headerTitle: "Oops!",
+        headerLeft: () => (
+          Platform.OS === 'ios' && (
+            <TouchableOpacity
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.back()
+              }}
+            >
+              <ChevronLeft
+                size={24}
+                color={colors.heading}
+              />
+            </TouchableOpacity>
+          )
+        ),
+      }} />
       <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
 
         {/* ── Card ── */}

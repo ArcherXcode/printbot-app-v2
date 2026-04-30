@@ -18,7 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-
+import * as Haptics from "expo-haptics";
 import { confirmPasswordResetSchema } from '@/lib/assetHooksApis/publicPages/types';
 import { useConfirmPasswordResetMutation } from '@/lib/assetHooksApis/publicPages/hooks';
 import type { ApiError } from '@/lib/api/error-map';
@@ -119,7 +119,10 @@ export default function ConfirmResetPasswordScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* ── Back ── */}
-          <Pressable onPress={() => router.back()} style={styles.backButton} hitSlop={12}>
+          <Pressable onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.back()
+          }} style={styles.backButton} hitSlop={12}>
             <Feather name="arrow-left" size={22} color={colors.heading} />
           </Pressable>
 
@@ -217,7 +220,10 @@ export default function ConfirmResetPasswordScreen() {
                   autoCapitalize="none"
                   autoComplete="new-password"
                 />
-                <Pressable onPress={() => setShowPassword((v) => !v)} style={styles.eyeButton} hitSlop={8}>
+                <Pressable onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setShowPassword((v) => !v)
+                }} style={styles.eyeButton} hitSlop={8}>
                   <Feather name={showPassword ? 'eye' : 'eye-off'} size={18} color={colors.icon} />
                 </Pressable>
               </View>
@@ -244,7 +250,10 @@ export default function ConfirmResetPasswordScreen() {
                   returnKeyType="done"
                   onSubmitEditing={handleSubmit}
                 />
-                <Pressable onPress={() => setShowConfirmPassword((v) => !v)} style={styles.eyeButton} hitSlop={8}>
+                <Pressable onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setShowConfirmPassword((v) => !v)
+                }} style={styles.eyeButton} hitSlop={8}>
                   <Feather name={showConfirmPassword ? 'eye' : 'eye-off'} size={18} color={colors.icon} />
                 </Pressable>
               </View>
@@ -253,7 +262,10 @@ export default function ConfirmResetPasswordScreen() {
 
             {/* Submit */}
             <Pressable
-              onPress={handleSubmit}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                handleSubmit()
+              }}
               disabled={isLoading}
               style={({ pressed }) => [
                 styles.ctaButton,
@@ -281,7 +293,10 @@ export default function ConfirmResetPasswordScreen() {
             <Text style={[styles.loginLabel, { color: colors.subheading }]}>
               Remember your password?{' '}
             </Text>
-            <Pressable onPress={() => router.replace('/(public)/login')}>
+            <Pressable onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.replace('/(public)/login')
+            }}>
               <Text style={[styles.loginLink, { color: colors.heading }]}>Log in</Text>
             </Pressable>
           </View>

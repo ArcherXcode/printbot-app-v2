@@ -19,14 +19,7 @@ export default function OrdersLayout() {
         headerShadowVisible: false,
         headerStyle: {
             backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors[colorScheme].headerBackground,
-        },
-        headerRight: () => (
-            <TouchableOpacity
-                onPress={() => router.push('/(private)/(notifications)/notifications')}
-            >
-                <Feather name="bell" size={22} color={colors[colorScheme].headerText} />
-            </TouchableOpacity>
-        )
+        }
     };
 
     return (

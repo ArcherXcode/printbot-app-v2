@@ -12,7 +12,7 @@ import { Stack, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlashList } from "@shopify/flash-list";
 import { MaterialIcons } from "@expo/vector-icons";
-import { RefreshCw } from "lucide-react-native";
+import * as Haptics from "expo-haptics";
 
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/appHooks/useColorScheme";
@@ -157,7 +157,10 @@ export default function VendorDashboardScreen() {
             <TouchableOpacity
               accessibilityRole="button"
               accessibilityLabel="View notifications"
-              onPress={() => router.push("/(private)/(notifications)/notifications")}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/(private)/(notifications)/notifications")
+              }}
             >
               <MaterialIcons name="notifications-none" size={24} color={colors[colorScheme].textPrimary} />
             </TouchableOpacity>

@@ -20,7 +20,7 @@ import { useRouter } from 'expo-router';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
-
+import * as Haptics from "expo-haptics";
 import { loginSchema, isTwoFactorChallenge, unwrapLoginResponse } from '@/lib/assetHooksApis/publicPages/types';
 import type { LoginDto } from '@/lib/assetHooksApis/publicPages/types';
 import { useLoginMutation } from '@/lib/assetHooksApis/publicPages/hooks';
@@ -326,7 +326,10 @@ export default function LoginScreen() {
                   Password
                 </Text>
                 <Pressable
-                  onPress={() => router.push('/(public)/requestResetPassword')}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push('/(public)/requestResetPassword')
+                  }}
                 >
                   <Text style={[styles.forgotLink, { color: colors.forgotLink }]}>
                     Forgot password?
@@ -369,7 +372,10 @@ export default function LoginScreen() {
                   textContentType="password"
                 />
                 <Pressable
-                  onPress={() => setShowPassword((v) => !v)}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setShowPassword((v) => !v)
+                  }}
                   style={styles.eyeButton}
                   hitSlop={8}
                   accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
@@ -391,7 +397,10 @@ export default function LoginScreen() {
             {/* ── Action Buttons ── */}
             <View style={styles.actionRow}>
               <Pressable
-                onPress={handleLogin}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  handleLogin()
+                }}
                 disabled={isLoading}
                 accessibilityRole="button"
                 accessibilityLabel="Log In"
@@ -418,7 +427,10 @@ export default function LoginScreen() {
               {/* ── Biometric Login button ── */}
               {biometricsEnabled && (
                 <Pressable
-                  onPress={handleBiometricLogin}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    handleBiometricLogin()
+                  }}
                   disabled={isLoading}
                   accessibilityRole="button"
                   accessibilityLabel="Log in with Biometrics"
@@ -440,7 +452,10 @@ export default function LoginScreen() {
             <Text style={[styles.signupLabel, { color: colors.subheading }]}>
               Don't have an account?{' '}
             </Text>
-            <Pressable onPress={() => router.push('/(public)/signupSelect')} accessibilityRole="link" accessibilityLabel="Sign Up">
+            <Pressable onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/(public)/signupSelect')
+            }} accessibilityRole="link" accessibilityLabel="Sign Up">
               <Text
                 style={[
                   styles.signupLink,
@@ -464,7 +479,10 @@ export default function LoginScreen() {
         </Text>
         <View style={styles.termsRow}>
           <Pressable
-            onPress={() => router.push('/(legal)/terms-and-conditions')}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/(legal)/terms-and-conditions')
+            }}
             accessibilityRole="link"
             accessibilityLabel="Terms of Service"
           >
@@ -475,7 +493,10 @@ export default function LoginScreen() {
           <Text style={[styles.termsText, { color: colors.termsText }]}>
             {' '}and{' '}
           </Text>
-          <Pressable onPress={() => router.push('/(legal)/privacy-policy')} accessibilityRole="link" accessibilityLabel="Privacy Policy">
+          <Pressable onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(legal)/privacy-policy')
+          }} accessibilityRole="link" accessibilityLabel="Privacy Policy">
             <Text style={[styles.termsLink, { color: colors.termsLink }]}>
               Privacy Policy
             </Text>

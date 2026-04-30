@@ -11,6 +11,7 @@ import { Clock, HelpCircle } from "lucide-react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
+import * as Haptics from "expo-haptics";
 
 // --- Helpers ---
 function formatTimestamp(raw: string): string {
@@ -174,7 +175,10 @@ function IOSCreateButton({
 }) {
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onPress()
+      }}
       style={({ pressed }) => [
         styles.iosButton,
         pressed && styles.iosButtonPressed,
@@ -195,7 +199,10 @@ function AndroidCreateFAB({
 }) {
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onPress();
+      }}
       style={({ pressed }) => [styles.fab, pressed && styles.fabPressed, { backgroundColor: colors[colorScheme].tabPill },]}
       android_ripple={{ color: 'rgba(255,255,255,0.3)', borderless: true, radius: 28 }}
     >
@@ -385,7 +392,10 @@ export default function SupportScreen() {
           headerLeft: () => (
             Platform.OS === 'ios' && (
               <TouchableOpacity
-                onPress={() => router.back()}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.back()
+                }}
               >
                 <ChevronLeft
                   size={24}
@@ -398,7 +408,10 @@ export default function SupportScreen() {
             <TouchableOpacity
               accessibilityRole="button"
               accessibilityLabel="Open filters"
-              onPress={() => setFiltersOpen(true)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setFiltersOpen(true)
+              }}
             >
               <MaterialIcons name="filter-list" size={24} color={theme.textPrimary} />
             </TouchableOpacity>
@@ -439,12 +452,17 @@ export default function SupportScreen() {
 
       <BottomSheet
         open={filtersOpen}
-        onClose={() => setFiltersOpen(false)}
+        onClose={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          setFiltersOpen(false)
+        }}
         onApply={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           setStatusFilter(tempStatusFilter);
           setFiltersOpen(false);
         }}
         onClear={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           setTempStatusFilter("all");
         }}
         title="Ticket filters"

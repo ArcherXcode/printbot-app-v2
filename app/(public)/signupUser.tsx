@@ -23,6 +23,7 @@ import { z } from 'zod';
 import { useSignupUserMutation } from '@/lib/assetHooksApis/publicPages/hooks';
 import type { SignupUserPayload } from '@/lib/assetHooksApis/publicPages/types';
 import type { ApiError } from '@/lib/api/error-map';
+import * as Haptics from "expo-haptics";
 
 /* ──────────────────────────────────────────
    Types
@@ -373,7 +374,10 @@ export default function SignupUserScreen() {
           error={errors.password}
           colors={colors}
           rightElement={
-            <Pressable onPress={() => setShowPassword((v) => !v)} style={styles.eyeButton} hitSlop={8}>
+            <Pressable onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowPassword((v) => !v)
+            }} style={styles.eyeButton} hitSlop={8}>
               <Feather name={showPassword ? 'eye' : 'eye-off'} size={18} color={colors.icon} />
             </Pressable>
           }
@@ -389,7 +393,10 @@ export default function SignupUserScreen() {
           error={errors.confirm_password}
           colors={colors}
           rightElement={
-            <Pressable onPress={() => setShowConfirmPassword((v) => !v)} style={styles.eyeButton} hitSlop={8}>
+            <Pressable onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowConfirmPassword((v) => !v)
+            }} style={styles.eyeButton} hitSlop={8}>
               <Feather name={showConfirmPassword ? 'eye' : 'eye-off'} size={18} color={colors.icon} />
             </Pressable>
           }
@@ -541,7 +548,10 @@ export default function SignupUserScreen() {
           {/* ── Navigation buttons ── */}
           <View style={styles.navRow}>
             <Pressable
-              onPress={handleBack}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                handleBack()
+              }}
               style={({ pressed }) => [
                 styles.outlineButton,
                 { borderColor: colors.inputBorder },
@@ -555,7 +565,10 @@ export default function SignupUserScreen() {
 
             {isLastStep ? (
               <Pressable
-                onPress={handleSubmit}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  handleSubmit()
+                }}
                 disabled={isLoading}
                 style={({ pressed }) => [
                   styles.filledButton,
@@ -578,7 +591,10 @@ export default function SignupUserScreen() {
               </Pressable>
             ) : (
               <Pressable
-                onPress={handleNext}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  handleNext()
+                }}
                 style={({ pressed }) => [
                   styles.filledButton,
                   pressed && styles.buttonPressed,
@@ -602,11 +618,17 @@ export default function SignupUserScreen() {
               By continuing, you agree to PrintBot's
             </Text>
             <View style={styles.termsRow}>
-              <Pressable onPress={() => router.push('/(legal)/terms-and-conditions')}>
+              <Pressable onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/(legal)/terms-and-conditions')
+              }}>
                 <Text style={[styles.termsLink, { color: colors.termsLink }]}>Terms of Service</Text>
               </Pressable>
               <Text style={[styles.termsText, { color: colors.termsText }]}> and </Text>
-              <Pressable onPress={() => router.push('/(legal)/privacy-policy')}>
+              <Pressable onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/(legal)/privacy-policy')
+              }}>
                 <Text style={[styles.termsLink, { color: colors.termsLink }]}>Privacy Policy</Text>
               </Pressable>
               <Text style={[styles.termsText, { color: colors.termsText }]}>.</Text>

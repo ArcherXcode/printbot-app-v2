@@ -21,6 +21,7 @@ import { useColorScheme } from "@/hooks/appHooks/useColorScheme";
 import PageState from "@/components/cards/PageState";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
+import * as Haptics from "expo-haptics";
 
 // --- Custom Animated Bottom Sheet ---
 function BottomSheet({
@@ -206,6 +207,7 @@ export default function AccountScreen() {
 
   const handleProfileSubmit = async () => {
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       const formData = new FormData();
       Object.entries(profileForm).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -222,6 +224,7 @@ export default function AccountScreen() {
 
   const handleBusinessSubmit = async () => {
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await updateBusiness.mutateAsync({
         opening_time: businessForm.opening_time || null,
         closing_time: businessForm.closing_time || null,
@@ -235,6 +238,7 @@ export default function AccountScreen() {
 
   const handleChangePassword = async () => {
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await changePasswordMutation.mutateAsync(passwordForm);
       setIsPasswordModalOpen(false);
       setPasswordForm({ current_password: "", new_password: "", confirm_password: "" });
@@ -246,6 +250,7 @@ export default function AccountScreen() {
 
   const handleEnableEmail2FA = async () => {
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await enableEmailTwoFactorMutation.mutateAsync();
       setIs2FAModalOpen(false);
       Alert.alert("Success", "Email-based 2FA was enabled.");
@@ -257,6 +262,7 @@ export default function AccountScreen() {
 
   const handleSetupAuthenticator = async () => {
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       const result = await setupAuthenticatorTwoFactorMutation.mutateAsync();
       setAuthenticatorSetupData(result as Record<string, unknown>);
       setTwoFactorMessage("Authenticator setup data is ready.");
@@ -267,6 +273,7 @@ export default function AccountScreen() {
 
   const handleEnableAuthenticator = async () => {
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await enableAuthenticatorTwoFactorMutation.mutateAsync({ code: authenticatorCode });
       setAuthenticatorCode("");
       setAuthenticatorSetupData(null);
@@ -280,6 +287,7 @@ export default function AccountScreen() {
 
   const handleDisable2FA = async () => {
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await disableTwoFactorMutation.mutateAsync({ password: disablePassword });
       setDisablePassword("");
       setAuthenticatorSetupData(null);
@@ -301,6 +309,7 @@ export default function AccountScreen() {
           text: 'Logout',
           style: 'destructive',
           onPress: async () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             await logoutMutation.mutateAsync();
             router.replace({
               pathname: "/(public)/login",
@@ -324,6 +333,7 @@ export default function AccountScreen() {
           text: "Logout",
           style: "destructive",
           onPress: async () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             await logoutAllMutation.mutateAsync();
             router.replace({
               pathname: "/(public)/login",
@@ -492,7 +502,11 @@ export default function AccountScreen() {
         <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Help</Text>
       </View>
       <View style={[styles.groupContainer, { backgroundColor: theme.elevated }]}>
-        {renderSettingsItem(<HelpCircle color={theme.textSecondary} size={22} />, "Contact Support", "Need help? Reach out to us", () => router.push('/(private)/(support)/support'))}
+        {renderSettingsItem(<HelpCircle color={theme.textSecondary} size={22} />, "Contact Support", "Need help? Reach out to us", () => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          router.push('/(private)/(support)/support')
+        })
+        }
       </View>
 
       {/* Danger Zone */}
@@ -517,6 +531,7 @@ export default function AccountScreen() {
         headerRight: () => (
           <TouchableOpacity onPress={() => {
             handleLogout();
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           }}>
             <Feather name="log-out" size={20} color="red" />
           </TouchableOpacity>

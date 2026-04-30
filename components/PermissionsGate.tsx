@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppPermissions } from '@/lib/hooks/useAppPermissions';
 import { useUiStore } from '@/lib/store/ui-store';
 import { useColorScheme } from '@/hooks/appHooks/useColorScheme';
+import * as Haptics from "expo-haptics";
 
 type PermissionsGateProps = {
   children: React.ReactNode;
@@ -49,45 +50,45 @@ export function PermissionsGate({ children }: PermissionsGateProps) {
       );
     }
 
-  const handleGrantPermissions = async () => {
-    setRequesting(true);
-    
-    // Sequence the requests nicely
-    if (!permissions.media.granted && permissions.media.canAskAgain) {
-      await requestMedia();
-    }
-    
-    if (!permissions.location.granted && permissions.location.canAskAgain) {
-      await requestLocation();
-    }
-    
-    if (!permissions.notifications.granted && permissions.notifications.canAskAgain) {
-      await requestNotifications();
-    }
+    const handleGrantPermissions = async () => {
+      setRequesting(true);
 
-    setRequesting(false);
-  };
+      // Sequence the requests nicely
+      if (!permissions.media.granted && permissions.media.canAskAgain) {
+        await requestMedia();
+      }
 
-  const handleOpenSettings = () => {
-    Linking.openSettings();
-  };
+      if (!permissions.location.granted && permissions.location.canAskAgain) {
+        await requestLocation();
+      }
 
-  const needsSettings = 
-    (!permissions.media.granted && !permissions.media.canAskAgain) ||
-    (!permissions.location.granted && !permissions.location.canAskAgain);
+      if (!permissions.notifications.granted && permissions.notifications.canAskAgain) {
+        await requestNotifications();
+      }
 
-  const isNetworkOffline = !permissions.network.connected;
+      setRequesting(false);
+    };
 
-  const colors = {
-    bg: isDark ? '#0a0e27' : '#f0f4ff',
-    card: isDark ? '#12183a' : '#ffffff',
-    cardBorder: isDark ? '#1e2a50' : '#dde3f5',
-    heading: isDark ? '#ffffff' : '#0a0e27',
-    subheading: isDark ? '#a0a8c8' : '#5a6080',
-    icon: isDark ? '#6b7194' : '#8890aa',
-    success: '#34c759',
-    error: '#e05c6a',
-  };
+    const handleOpenSettings = () => {
+      Linking.openSettings();
+    };
+
+    const needsSettings =
+      (!permissions.media.granted && !permissions.media.canAskAgain) ||
+      (!permissions.location.granted && !permissions.location.canAskAgain);
+
+    const isNetworkOffline = !permissions.network.connected;
+
+    const colors = {
+      bg: isDark ? '#0a0e27' : '#f0f4ff',
+      card: isDark ? '#12183a' : '#ffffff',
+      cardBorder: isDark ? '#1e2a50' : '#dde3f5',
+      heading: isDark ? '#ffffff' : '#0a0e27',
+      subheading: isDark ? '#a0a8c8' : '#5a6080',
+      icon: isDark ? '#6b7194' : '#8890aa',
+      success: '#34c759',
+      error: '#e05c6a',
+    };
 
     return (
       <View style={[styles.absoluteOverlay, { backgroundColor: colors.bg, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
@@ -100,7 +101,7 @@ export function PermissionsGate({ children }: PermissionsGateProps) {
               {isFirstLaunch ? 'Welcome to PrintBot' : 'Permissions Required'}
             </Text>
             <Text style={[styles.subtitle, { color: colors.subheading }]}>
-              {isFirstLaunch 
+              {isFirstLaunch
                 ? "To get started, we need a few permissions to ensure the app works seamlessly for you."
                 : "PrintBot needs certain permissions to function correctly. Please enable them in your settings."}
             </Text>
@@ -115,7 +116,7 @@ export function PermissionsGate({ children }: PermissionsGateProps) {
               granted={permissions.media.granted}
               colors={colors}
             />
-            
+
             {/* Network Connection */}
             <PermissionItem
               icon="wifi"
@@ -152,7 +153,10 @@ export function PermissionsGate({ children }: PermissionsGateProps) {
           <View style={styles.footer}>
             {isNetworkOffline ? (
               <Pressable
-                onPress={() => checkPermissions()}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  checkPermissions();
+                }}
                 style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
               >
                 <LinearGradient
@@ -166,7 +170,10 @@ export function PermissionsGate({ children }: PermissionsGateProps) {
               </Pressable>
             ) : needsSettings ? (
               <Pressable
-                onPress={handleOpenSettings}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  handleOpenSettings();
+                }}
                 style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
               >
                 <LinearGradient
@@ -180,7 +187,10 @@ export function PermissionsGate({ children }: PermissionsGateProps) {
               </Pressable>
             ) : (
               <Pressable
-                onPress={handleGrantPermissions}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  handleGrantPermissions();
+                }}
                 disabled={requesting}
                 style={({ pressed }) => [styles.button, pressed && styles.buttonPressed, requesting && styles.buttonDisabled]}
               >
@@ -212,18 +222,18 @@ export function PermissionsGate({ children }: PermissionsGateProps) {
   );
 }
 
-function PermissionItem({ 
-  icon, 
-  title, 
-  description, 
-  granted, 
+function PermissionItem({
+  icon,
+  title,
+  description,
+  granted,
   colors,
-  optional = false 
-}: { 
-  icon: any, 
-  title: string, 
-  description: string, 
-  granted: boolean, 
+  optional = false
+}: {
+  icon: any,
+  title: string,
+  description: string,
+  granted: boolean,
   colors: any,
   optional?: boolean
 }) {
