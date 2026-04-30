@@ -184,6 +184,31 @@ export type TwoFactorSetupResponse = {
   data: Record<string, unknown>;
 };
 
+function decodeBase64(str: string): string {
+  const b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+  let decoded = "";
+  let i = 0;
+  
+  str = str.replace(/[^A-Za-z0-9+/=]/g, "");
+
+  while (i < str.length) {
+    const enc1 = b64.indexOf(str.charAt(i++));
+    const enc2 = b64.indexOf(str.charAt(i++));
+    const enc3 = b64.indexOf(str.charAt(i++));
+    const enc4 = b64.indexOf(str.charAt(i++));
+
+    const chr1 = (enc1 << 2) | (enc2 >> 4);
+    const chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+    const chr3 = ((enc3 & 3) << 6) | enc4;
+
+    decoded += String.fromCharCode(chr1);
+    if (enc3 !== 64) decoded += String.fromCharCode(chr2);
+    if (enc4 !== 64) decoded += String.fromCharCode(chr3);
+  }
+
+  return decoded;
+}
+
 export function deriveRoleFromToken(accessToken: string): UserRole {
   try {
     const payloadPart = accessToken.split(".")[1];
@@ -192,7 +217,21 @@ export function deriveRoleFromToken(accessToken: string): UserRole {
       return "USER";
     }
 
-    const decoded = JSON.parse(atob(payloadPart.replace(/-/g, "+").replace(/_/g, "/"))) as {
+    const base64Str = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
+    // Add padding if necessary
+    const paddedStr = base64Str.padEnd(base64Str.length + (4 - base64Str.length % 4) % 4, "=");
+    
+    const decodedPayload = decodeBase64(paddedStr);
+    
+    // Properly handle UTF-8 sequences that String.fromCharCode might have messed up
+    const utf8Payload = decodeURIComponent(
+      decodedPayload
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+
+    const decoded = JSON.parse(utf8Payload) as {
       role?: string;
       user_role?: string;
       roles?: string[];
@@ -201,11 +240,12 @@ export function deriveRoleFromToken(accessToken: string): UserRole {
     const candidate = decoded.role ?? decoded.user_role ?? decoded.roles?.[0];
 
     if (candidate === "ADMIN" || candidate === "VENDOR" || candidate === "USER") {
-      return candidate;
+      return candidate as UserRole;
     }
 
     return "USER";
-  } catch {
+  } catch (err) {
+    console.warn("Failed to derive role from token", err);
     return "USER";
   }
 }

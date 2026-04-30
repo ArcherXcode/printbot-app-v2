@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlashList } from "@shopify/flash-list";
 import { PackageOpen, Star, Store } from "lucide-react-native";
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
+import PageState from "@/components/cards/PageState";
 
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/appHooks/useColorScheme";
@@ -452,7 +453,13 @@ export default function UserDashboardScreen() {
                 </View>
               ) : vendorsQuery.isError ? (
                 <View style={styles.emptyContainer}>
-                  <PageState title="Unable to load print shops" subtitle="Please retry print shop discovery." colorScheme={colorScheme} />
+                  <PageState
+                    title="Unable to load print shops"
+                    subtitle="Please retry print shop discovery."
+                    onAction={() => void vendorsQuery.refetch()}
+                    actionLabel="Retry"
+                    colorScheme={colorScheme}
+                  />
                 </View>
               ) : (
                 <View style={styles.emptyContainer}>
@@ -512,28 +519,6 @@ export default function UserDashboardScreen() {
   );
 }
 
-function PageState({
-  title,
-  subtitle,
-  loading,
-  icon,
-  colorScheme,
-}: {
-  title: string;
-  subtitle?: string;
-  loading?: boolean;
-  icon?: boolean;
-  colorScheme: "light" | "dark";
-}) {
-  return (
-    <View style={styles.emptyContainer}>
-      {loading ? <ActivityIndicator size="large" color={colors[colorScheme].primary} /> : null}
-      {icon && !loading ? <Store size={40} color={colors[colorScheme].textSecondary} style={{ marginBottom: 16 }} /> : null}
-      <Text style={[styles.emptyTitle, { color: colors[colorScheme].textPrimary, marginTop: loading || icon ? 16 : 0 }]}>{title}</Text>
-      {subtitle ? <Text style={[styles.emptySub, { color: colors[colorScheme].textSecondary }]}>{subtitle}</Text> : null}
-    </View>
-  );
-}
 
 function InfiniteListFooter({
   isLoading,

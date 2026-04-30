@@ -11,15 +11,10 @@ export type OrderHistoryFilters = {
 export type OrderHistoryResponse = PaginatedResponse<OrderRecord>;
 
 function toQueryString(filters: OrderHistoryFilters) {
-  const query = new URLSearchParams();
-
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== "") {
-      query.set(key, String(value));
-    }
-  });
-
-  return query.toString();
+  return Object.entries(filters)
+    .filter(([_, value]) => value !== undefined && value !== null && value !== "")
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+    .join("&");
 }
 
 export function getOrderById(orderId: string) {

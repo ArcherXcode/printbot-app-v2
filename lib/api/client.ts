@@ -1,19 +1,18 @@
 import { normalizeApiError, type ApiError } from "@/lib/api/error-map";
 import { deriveRoleFromToken } from "@/lib/assetHooksApis/publicPages/types";
 import { authStore } from "@/lib/store/auth-store";
+import Constants from "expo-constants";
 
-const DEFAULT_API_ORIGIN = process.env.API_URL || "http://192.168.1.144:3000";
+// Dynamically resolve the developer's local IP from Expo if available, otherwise fallback
+const debuggerHost = Constants.expoConfig?.hostUri;
+const localIp = debuggerHost ? debuggerHost.split(':')[0] : "192.168.1.144";
+
+const DEFAULT_API_ORIGIN = process.env.EXPO_PUBLIC_API_URL || `http://${localIp}:3000`;
 const API_PREFIX = process.env.API_PREFIX || "/v1/api";
 
 function resolveApiBaseUrl() {
-  // In development always use the Vite proxy to keep auth cookies same-site.
-  // This avoids browser rejection of SameSite=Lax refresh cookies on cross-site requests.
-  if (process.env.DEV) {
-    return API_PREFIX;
-  }
-
-  const rawOrigin = process.env.API_BASE_URL?.trim();
-  const origin = (rawOrigin && rawOrigin.length > 0 ? rawOrigin : DEFAULT_API_ORIGIN).replace(/\/+$/, "");
+  const rawOrigin = process.env.EXPO_PUBLIC_API_URL || process.env.API_BASE_URL;
+  const origin = (rawOrigin && rawOrigin.trim().length > 0 ? rawOrigin.trim() : DEFAULT_API_ORIGIN).replace(/\/+$/, "");
 
   if (origin.endsWith(API_PREFIX)) {
     return origin;

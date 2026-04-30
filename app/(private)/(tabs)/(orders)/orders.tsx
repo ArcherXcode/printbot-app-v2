@@ -207,7 +207,7 @@ export default function OrdersScreen() {
     [statusFilters, page, limit],
   );
 
-  const userHistoryQuery = useOrderHistory(userFilters);
+  const userHistoryQuery = useOrderHistory(userFilters, !isVendor);
   const vendorOrdersQuery = useVendorOrdersWithFilters(userFilters, isVendor);
 
   const activeQuery = isVendor ? vendorOrdersQuery : userHistoryQuery;

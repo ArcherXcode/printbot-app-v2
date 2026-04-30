@@ -1,7 +1,6 @@
 import { StyleSheet, Text, View, Pressable, ActivityIndicator } from "react-native";
-import { AlertCircle, PackageOpen } from "lucide-react-native";
+import { AlertCircle, Package } from "lucide-react-native";
 import { colors } from "@/constants/colors";
-import { useColorScheme } from "@/hooks/appHooks/useColorScheme";
 
 export default function PageState({
   title,
@@ -22,13 +21,21 @@ export default function PageState({
 }) {
 
   return (
-    <View style={[styles.stateCard, { backgroundColor: colors[colorScheme].elevated, borderColor: colors[colorScheme].border }]}>
-      {loading ? <ActivityIndicator color={colors[colorScheme].primary} /> : empty ? <PackageOpen size={34} color={colors[colorScheme].textSecondary} /> : <AlertCircle size={34} color={colors[colorScheme].danger} />}
-      <Text style={[styles.stateTitle, { color: colors[colorScheme].textPrimary }]}>{title}</Text>
-      {subtitle ? <Text style={[styles.stateSubtitle, { color: colors[colorScheme].textSecondary }]}>{subtitle}</Text> : null}
+    <View style={styles.emptyContainer}>
+      {loading ? (
+        <ActivityIndicator size="large" color={colors[colorScheme].primary} style={{ marginBottom: 16 }} />
+      ) : empty ? (
+        <Package size={40} color={colors[colorScheme].textSecondary || colors[colorScheme].border} style={{ marginBottom: 16 }} />
+      ) : (
+        <AlertCircle size={40} color={colors[colorScheme].textSecondary || colors[colorScheme].border} style={{ marginBottom: 16 }} />
+      )}
+      
+      <Text style={[styles.emptyTitle, { color: colors[colorScheme].textPrimary }]}>{title}</Text>
+      {subtitle ? <Text style={[styles.emptySub, { color: colors[colorScheme].textSecondary }]}>{subtitle}</Text> : null}
+      
       {actionLabel && onAction ? (
-        <Pressable style={({ pressed }) => [styles.stateAction, { backgroundColor: colors[colorScheme].primary, opacity: pressed ? 0.82 : 1 }]} onPress={onAction}>
-          <Text style={styles.stateActionText}>{actionLabel}</Text>
+        <Pressable style={({ pressed }) => [styles.actionButton, { backgroundColor: colors[colorScheme].primary, opacity: pressed ? 0.82 : 1 }]} onPress={onAction}>
+          <Text style={styles.actionButtonText}>{actionLabel}</Text>
         </Pressable>
       ) : null}
     </View>
@@ -36,37 +43,33 @@ export default function PageState({
 }
 
 const styles = StyleSheet.create({
-  stateCard: {
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 18,
-    borderWidth: 1,
-    borderStyle: "dashed",
-    gap: 9,
-    minHeight: 320,
-    padding: 24,
+  emptyContainer: {
+    padding: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  stateTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    textAlign: "center",
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
   },
-  stateSubtitle: {
-    fontSize: 12,
-    lineHeight: 17,
-    textAlign: "center",
+  emptySub: {
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
   },
-  stateAction: {
-    minHeight: 42,
+  actionButton: {
+    minHeight: 44,
     borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 18,
-    marginTop: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    marginTop: 20,
   },
-  stateActionText: {
+  actionButtonText: {
     color: "#fff",
-    fontSize: 13,
-    fontWeight: "800",
+    fontSize: 14,
+    fontWeight: "700",
   },
 });

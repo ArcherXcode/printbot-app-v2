@@ -14,10 +14,11 @@ import {
   verifyOrderOtp,
 } from "./api";
 
-export function useOrderHistory(filters: OrderHistoryFilters = {}) {
+export function useOrderHistory(filters: OrderHistoryFilters = {}, enabled = true) {
   return useQuery({
     queryKey: ["orders", "history", filters],
     queryFn: () => getOrderHistory(filters),
+    enabled,
     retry: (failureCount, error) => {
       const mapped = normalizeApiError(error);
       if (mapped.code === "HTTP_403" || mapped.code === "HTTP_404") {
