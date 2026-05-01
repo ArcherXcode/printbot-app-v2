@@ -39,6 +39,8 @@ export default function LoginScreen() {
 
   const biometricsEnabled = useAuthStore((s) => s.biometricsEnabled);
   const setBiometricsEnabled = useAuthStore((s) => s.setBiometricsEnabled);
+  const setPendingBiometricPrompt = useAuthStore((s) => s.setPendingBiometricPrompt);
+  const setLastLoginCredentials = useAuthStore((s) => s.setLastLoginCredentials);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -73,36 +75,51 @@ export default function LoginScreen() {
     return result.data;
   };
 
+  const finishLogin = () => {
+    setPendingBiometricPrompt(false);
+    router.replace('/(private)/(tabs)/(dashboard)/dashboard');
+  };
+
   const handlePostLogin = async (payload: LoginDto) => {
-    let currentBiometricsEnabled = biometricsEnabled;
+    // Cache credentials in the store (persisted to AsyncStorage) for settings page
+    setLastLoginCredentials(payload.username, payload.password);
+    // Also cache in SecureStore for backwards compat
+    await SecureStore.setItemAsync('last_login_username', payload.username);
+    await SecureStore.setItemAsync('last_login_password', payload.password);
+
+    let isBioActive = biometricsEnabled;
 
     if (biometricsEnabled) {
-      const storedUsername = await SecureStore.getItemAsync('bio_username');
-      if (storedUsername && storedUsername !== payload.username) {
-        // Logged into a different account; clear old credentials and prompt again
+      const storedBioUsername = await SecureStore.getItemAsync('bio_username');
+      if (storedBioUsername && storedBioUsername !== payload.username) {
+        // Different account — clear bio credentials and disable
         await SecureStore.deleteItemAsync('bio_username');
         await SecureStore.deleteItemAsync('bio_password');
         setBiometricsEnabled(false);
-        currentBiometricsEnabled = false;
-      } else if (storedUsername && storedUsername === payload.username) {
-        // Update password just in case it was changed
+        isBioActive = false;
+      } else {
+        // Same account — keep bio credentials fresh
+        await SecureStore.setItemAsync('bio_username', payload.username);
         await SecureStore.setItemAsync('bio_password', payload.password);
       }
     }
 
-    if (!currentBiometricsEnabled) {
+    // If biometrics ended up disabled (or was never enabled), offer to enable it
+    if (!isBioActive) {
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
       if (hasHardware && isEnrolled) {
+        // Set the pending flag so root layout keeps us on the public stack
+        setPendingBiometricPrompt(true);
         Alert.alert(
-          'Enable Biometrics',
-          'Would you like to enable Face ID / Touch ID for quicker login next time?',
+          'Enable Biometric Login',
+          'Log in faster with Face ID or Touch ID next time.',
           [
             {
-              text: 'Not Now',
+              text: 'Skip',
               style: 'cancel',
-              onPress: () => router.replace('/(private)/(tabs)/(dashboard)/dashboard'),
+              onPress: () => finishLogin(),
             },
             {
               text: 'Enable',
@@ -115,7 +132,7 @@ export default function LoginScreen() {
                   await SecureStore.setItemAsync('bio_password', payload.password);
                   setBiometricsEnabled(true);
                 }
-                router.replace('/(private)/(tabs)/(dashboard)/dashboard');
+                finishLogin();
               },
             },
           ]
@@ -124,7 +141,7 @@ export default function LoginScreen() {
       }
     }
 
-    router.replace('/(private)/(tabs)/(dashboard)/dashboard');
+    finishLogin();
   };
 
   const handleBiometricLogin = async () => {
@@ -148,7 +165,10 @@ export default function LoginScreen() {
               );
               return;
             }
-            handlePostLogin(payload);
+            // Navigate directly — biometrics are already fully set up, no need to re-prompt
+            // Update cached credentials
+            setLastLoginCredentials(storedUsername, storedPassword);
+            router.replace('/(private)/(tabs)/(dashboard)/dashboard');
           },
           onError: (error) => {
             const apiError = error as unknown as ApiError;
@@ -158,7 +178,11 @@ export default function LoginScreen() {
           },
         });
       } else {
-        setErrors({ form: 'Biometric credentials not found. Please log in manually.' });
+        Alert.alert(
+          'Setup Not Complete',
+          'Please sign in with your username and password once to finish biometric setup.',
+          [{ text: 'OK' }]
+        );
       }
     }
   };
@@ -169,9 +193,14 @@ export default function LoginScreen() {
 
     setErrors({});
 
+    // Set the pending flag BEFORE the mutation fires, so when onSuccess sets
+    // isAuthenticated=true the root layout still keeps us on the public stack
+    setPendingBiometricPrompt(true);
+
     loginMutation.mutate(payload, {
       onSuccess: (data) => {
         if (isTwoFactorChallenge(data)) {
+          setPendingBiometricPrompt(false);
           Alert.alert(
             'Two-Factor Authentication',
             'Your account has 2FA enabled. Please verify via the web portal for now — mobile 2FA support is coming soon.',
@@ -183,6 +212,7 @@ export default function LoginScreen() {
         handlePostLogin(payload);
       },
       onError: (error) => {
+        setPendingBiometricPrompt(false);
         const apiError = error as unknown as ApiError;
         setErrors({
           form: apiError.message || 'Invalid credentials. Please try again.',

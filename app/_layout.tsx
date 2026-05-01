@@ -126,11 +126,15 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const pendingBiometricPrompt = useAuthStore((s) => s.pendingBiometricPrompt);
+
+  // Stay on the public stack while the biometric enable/skip alert is showing
+  const shouldShowPrivate = isAuthenticated && !pendingBiometricPrompt;
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <PermissionsGate>
-        <Stack initialRouteName={isAuthenticated ? '(private)' : '(public)'} screenOptions={{ headerShown: false }}>
+        <Stack initialRouteName={shouldShowPrivate ? '(private)' : '(public)'} screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(legal)" options={{ headerShown: false }} />
           <Stack.Screen name="(private)" options={{ headerShown: false }} />
           <Stack.Screen name="(public)" options={{ headerShown: false }} />

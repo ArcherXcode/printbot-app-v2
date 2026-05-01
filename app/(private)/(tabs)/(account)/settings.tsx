@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import { StyleSheet, Text, View, Pressable, TextInput, Modal, Platform, Alert, ActivityIndicator, Animated, Easing, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, Pressable, TextInput, Modal, Platform, Alert, ActivityIndicator, Animated, Easing, ScrollView, TouchableOpacity, Switch } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { User, Building2, AlarmClockPlus, KeyRound, SmartphoneNfc, LogOut, ChevronRight, HelpCircle, X, Save, UserPen } from "lucide-react-native";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
@@ -22,6 +22,8 @@ import PageState from "@/components/cards/PageState";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
+import * as LocalAuthentication from "expo-local-authentication";
+import * as SecureStore from "expo-secure-store";
 
 // --- Custom Animated Bottom Sheet ---
 function BottomSheet({
@@ -123,7 +125,81 @@ export default function AccountScreen() {
   const router = useRouter();
 
   const { role, user } = useAuthStore();
+  const biometricsEnabled = useAuthStore((s) => s.biometricsEnabled);
+  const setBiometricsEnabled = useAuthStore((s) => s.setBiometricsEnabled);
   const isVendor = (role ?? "USER").toUpperCase() === "VENDOR";
+
+  // Biometrics state
+  const [bioSupported, setBioSupported] = useState(false);
+  const [bioTogglingLoading, setBioTogglingLoading] = useState(false);
+
+  useEffect(() => {
+    // Check if the device supports biometric authentication
+    (async () => {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      setBioSupported(hasHardware && isEnrolled);
+    })();
+  }, []);
+
+  const handleBiometricToggle = async (newValue: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (newValue) {
+      // Read credentials from store first, fall back to SecureStore
+      const storeState = useAuthStore.getState();
+      let cachedUsername = storeState.lastLoginUsername;
+      let cachedPassword = storeState.lastLoginPassword;
+
+      if (!cachedUsername || !cachedPassword) {
+        cachedUsername = await SecureStore.getItemAsync('last_login_username');
+        cachedPassword = await SecureStore.getItemAsync('last_login_password');
+      }
+
+      if (!cachedUsername || !cachedPassword) {
+        Alert.alert(
+          'Sign In Required',
+          'Please log out and sign in with your password once to enable biometric login.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      setBioTogglingLoading(true);
+      try {
+        const result = await LocalAuthentication.authenticateAsync({
+          promptMessage: 'Enable Biometric Login',
+          cancelLabel: 'Cancel',
+        });
+        if (result.success) {
+          // Full setup — both username and password are stored from the cached login
+          await SecureStore.setItemAsync('bio_username', cachedUsername);
+          await SecureStore.setItemAsync('bio_password', cachedPassword);
+          setBiometricsEnabled(true);
+        }
+      } catch {
+        Alert.alert('Error', 'Biometric authentication failed. Please try again.');
+      } finally {
+        setBioTogglingLoading(false);
+      }
+    } else {
+      Alert.alert(
+        'Disable Biometric Login',
+        'Are you sure you want to disable biometric login?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Disable',
+            style: 'destructive',
+            onPress: async () => {
+              await SecureStore.deleteItemAsync('bio_username');
+              await SecureStore.deleteItemAsync('bio_password');
+              setBiometricsEnabled(false);
+            },
+          },
+        ]
+      );
+    }
+  };
 
   const meQuery = useMe();
   const updateMutation = useUpdateMe();
@@ -481,6 +557,33 @@ export default function AccountScreen() {
         {renderSettingsItem(<KeyRound color={theme.textSecondary} size={22} />, "Change Password", undefined, () => setIsPasswordModalOpen(true))}
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
         {renderSettingsItem(<SmartphoneNfc color={theme.textSecondary} size={22} />, "Two-Step Verification", is2FAEnabled ? "Enabled" : "Off", () => setIs2FAModalOpen(true))}
+        {bioSupported && (
+          <>
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+            <View style={[styles.settingsItem, { backgroundColor: theme.elevated }]}>
+              <View style={styles.settingsItemLeft}>
+                <MaterialIcons name="fingerprint" size={22} color={theme.textSecondary} />
+                <View style={styles.settingsItemText}>
+                  <Text style={[styles.settingsItemTitle, { color: theme.textPrimary }]}>Biometric Login</Text>
+                  <Text style={[styles.settingsItemSubtitle, { color: theme.textSecondary }]}>
+                    {biometricsEnabled ? "Enabled" : "Off"}
+                  </Text>
+                </View>
+              </View>
+              {bioTogglingLoading ? (
+                <ActivityIndicator size="small" color={theme.primary} />
+              ) : (
+                <Switch
+                  value={biometricsEnabled}
+                  onValueChange={handleBiometricToggle}
+                  trackColor={{ false: theme.border, true: theme.primary + "80" }}
+                  thumbColor={biometricsEnabled ? theme.primary : theme.textSecondary}
+                  ios_backgroundColor={theme.border}
+                />
+              )}
+            </View>
+          </>
+        )}
       </View>
 
       {/* Vendor Group */}

@@ -8,8 +8,10 @@ export default function PublicLayout() {
     const colorScheme = useColorScheme();
     const isFirstLaunch = useUiStore((s) => s.isFirstLaunch);
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+    const pendingBiometricPrompt = useAuthStore((s) => s.pendingBiometricPrompt);
 
-    if (isAuthenticated) {
+    // Keep login screen mounted while biometric enable prompt is pending.
+    if (isAuthenticated && !pendingBiometricPrompt) {
         return <Redirect href='/(private)/(tabs)/(dashboard)/dashboard' />;
     }
 
